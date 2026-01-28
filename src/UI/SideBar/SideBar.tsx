@@ -2,7 +2,7 @@
 import { Menu, theme } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { BarsOutlined } from "@ant-design/icons";
-import { SnippetsOutlined      } from "@ant-design/icons";
+import { SnippetsOutlined} from "@ant-design/icons";
 
 interface SideBarProps {
     selectedKey: string;
@@ -12,7 +12,7 @@ interface SideBarProps {
 const menuItems = [
     {
         key: "invoices",
-        icon: <SnippetsOutlined     />,
+        icon: <SnippetsOutlined/>,
         label: "Накладные",
         children: [
             { key: "income", label: "Приход" },
@@ -53,7 +53,7 @@ const SideBar = ({ selectedKey, onSelect }: SideBarProps) => {
         <Sider width={200} style={{ background: colorBgContainer }}>
             <Menu
                 mode="inline"
-                defaultOpenKeys={["directories"]}
+                defaultOpenKeys={["invoices"]}
                 selectedKeys={[selectedKey]}
                 style={{ height: "100%", borderRight: 0 }}
                 items={menuItems}
