@@ -1,61 +1,60 @@
-import { useState } from "react";
-import PrihodForm from "./components/PrihodForm";
-import PrihodTable from "./PrihodTable";
-import type { IncomingGoodsFormValues } from "./components/PrihodForm";
-
-const initialData = [
-    {
-        key: "1",
-        product: "Зеркало боковое MB Sprinter",
-        quantity: 1,
-        price: 3200,
-        total: 3200,
-        priceKgs: 3200,
-        totalKgs: 3200,
-    },
-    {
-        key: "2",
-        product: "Фара передняя левая MB Sprinter",
-        quantity: 2,
-        price: 5500,
-        total: 11000,
-        priceKgs: 5500,
-        totalKgs: 11000,
-    },
-];
+import { useRef, useState } from "react";
+import { Button, Divider, Space, message } from "antd";
+import { useReactToPrint } from "react-to-print";
+import type { HeaderValues } from "./components/PrihodHeaderForm";
+import type { GoodsItem } from "./components/PrihodGoodsTable";
+import PrihodHeaderForm from "./components/PrihodHeaderForm";
+import PrihodGoodsTable from "./components/PrihodGoodsTable";
+import PrihodPrint from "./components/PrihodPrint";
 
 const PrihodPage = () => {
-    const [items, setItems] = useState<any[]>([]);
+  const printRef = useRef<HTMLDivElement>(null);
 
-    const handleAdd = (values: IncomingGoodsFormValues) => {
-        setItems((prev) => [
-            ...prev,
-            {
-                key: Date.now().toString(),
-                product: values.product,
-                quantity: values.quantity,
-                price: values.price,
-                total: values.total,
-                priceKgs: values.priceKgs,
-                totalKgs: values.totalKgs,
-            },
-        ]);
-    };
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: "Приходная накладная",
+  });
 
-    // Объединяем исходные данные и добавленные
-    const combinedData = [...initialData, ...items];
+  const [header, setHeader] = useState<HeaderValues | null>(null);
+  const [items, setItems] = useState<GoodsItem[]>([]);
 
-    return (
-        <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
-            <div style={{ width: 360 }}>
-                <PrihodForm onAdd={handleAdd} />
-            </div>
+  const handleSave = () => {
+    if (!header || items.length === 0) {
+      message.error("Заполните шапку и товары");
+      return;
+    }
+    message.success("Документ проведён");
+  };
 
-            <div style={{ flex: 1 }}>
-                <PrihodTable data={combinedData} />
-            </div>
-        </div>
-    );
+  return (
+    <div style={{ padding: 24 }}>
+      <h2>Приходная накладная</h2>
+
+      <PrihodHeaderForm onChange={setHeader} />
+
+      <Divider />
+
+      <PrihodGoodsTable
+        items={items}
+        onAdd={(item: any) => setItems((p) => [...p, item])}
+      />
+
+      <Divider />
+
+      <Space>
+        <Button type="primary" onClick={handleSave}>
+          Провести
+        </Button>
+
+        <Button onClick={handlePrint}>Печать</Button>
+      </Space>
+
+      {/* Печатная форма */}
+      <div style={{ display: "none" }}>
+        <PrihodPrint ref={printRef} header={header} items={items} />
+      </div>
+    </div>
+  );
 };
 
 export default PrihodPage;
