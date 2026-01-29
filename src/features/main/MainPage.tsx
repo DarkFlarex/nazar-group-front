@@ -7,11 +7,12 @@ import CategoriesTable from "../SideBarCategoriesTable/CategoriesTable.tsx";
 import SuppliersTable from "../SuppliersTable/SuppliersTable.tsx";
 import {mockProducts, type Product} from "../../types/products.ts";
 import CustomerOrdersPage from "../CustomerOrders/CustomerOrdersPage.tsx";
+import PrihodPage from "../PrihodPage/PrihodPage.tsx";
 
 const { Content } = Layout;
 
 const MainPage = () => {
-    const [selectedSection, setSelectedSection] = useState("clients");
+    const [selectedSection, setSelectedSection] = useState("customerOrdersPage");
     const [products, setProducts] = useState<Product[]>(mockProducts);
 
     return (
@@ -20,6 +21,7 @@ const MainPage = () => {
 
             <Layout>
                 <Content style={{ padding: 5 }}>
+                    {selectedSection === "prihod" && <PrihodPage/>}
                     {selectedSection === "customerOrdersPage" && <CustomerOrdersPage />}
                     {selectedSection === "clients" && <SideBarClientsTable />}
                     {selectedSection === "products" &&    <SideBarProductsTable products={products} setProducts={setProducts} />}

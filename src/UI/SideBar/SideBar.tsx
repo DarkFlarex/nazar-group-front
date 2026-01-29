@@ -15,7 +15,7 @@ const menuItems = [
         icon: <SnippetsOutlined/>,
         label: "Накладные",
         children: [
-            { key: "income", label: "Приход" },
+            { key: "prihod", label: "Приход" },
             { key: "customerOrdersPage", label: "Заказы клиентов" },
         ],
     },

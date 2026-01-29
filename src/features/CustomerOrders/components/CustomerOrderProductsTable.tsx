@@ -1,5 +1,6 @@
 import { Button, Popconfirm, Table, Typography } from "antd";
 import { useState } from "react";
+import CustomerOrderProductsForm from "./CustomerOrderProductsForm.tsx";
 
 interface ProductOrder {
     key: string;
@@ -78,6 +79,7 @@ const CustomerOrderProductsTable = () => {
 
     return (
         <>
+            <CustomerOrderProductsForm/>
             <Typography.Title level={3} style={{ marginBottom: 24 }}>
                 Товары
             </Typography.Title>
