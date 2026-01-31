@@ -9,6 +9,12 @@ import { mockProducts, type Product } from "../../types/products.ts";
 import CustomerOrdersPage from "../CustomerOrders/CustomerOrdersPage.tsx";
 import PrihodPage from "../PrihodPage/PrihodPage.tsx";
 import MarketplaceForm from "../marcetplace.tsx";
+import CardsPage from "../CardsPage.tsx";
+import ExpensePage from "../ExpensePage.tsx";
+import CardsPageOZ from "../CardsPageOzon.tsx";
+import ReportsPage from "../ReportsPage .tsx";
+import OrdersWBPage from "../orderWB.tsx";
+import SupplierOrdersPage from "../SupplierOrdersPage.tsx";
 
 const { Content } = Layout;
 
@@ -22,7 +28,12 @@ const MainPage = () => {
 
       <Layout>
         <Content style={{ padding: 5 }}>
-          {selectedSection === "prihod" && <MarketplaceForm />}
+          {selectedSection === "prihod" && <PrihodPage />}
+          {selectedSection === "rashod" && <ExpensePage />}
+          {selectedSection === "wildberis" && <MarketplaceForm />}
+          {selectedSection === "cardsmerket" && <CardsPage />}
+          {selectedSection === "ozonCards" && <CardsPageOZ />}
+          {selectedSection === "ozon" && <MarketplaceForm />}
           {selectedSection === "customerOrdersPage" && <CustomerOrdersPage />}
           {selectedSection === "clients" && <SideBarClientsTable />}
           {selectedSection === "products" && (
@@ -31,8 +42,11 @@ const MainPage = () => {
               setProducts={setProducts}
             />
           )}
+          {selectedSection === "reports" && <ReportsPage />}
           {selectedSection === "categories" && <CategoriesTable />}
           {selectedSection === "suppliers" && <SuppliersTable />}
+          {selectedSection === "orderWB" && <OrdersWBPage />}
+          {selectedSection === "orderSuplier" && <SupplierOrdersPage />}
         </Content>
       </Layout>
     </Layout>
