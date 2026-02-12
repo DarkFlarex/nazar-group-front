@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Card,
   Table,
@@ -8,17 +8,14 @@ import {
   Select,
   DatePicker,
   InputNumber,
-  Space,
   message,
 } from "antd";
-import dayjs from "dayjs";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const SupplierOrdersPage = () => {
-  const [form] = Form.useForm();
-  const [orders, setOrders] = useState([]); // Таблица заказов
+  const [orders, setOrders] = useState<any>([]); // Таблица заказов
   const [supplier, setSupplier] = useState(null);
 
   const handleAddRow = () => {
@@ -38,13 +35,13 @@ const SupplierOrdersPage = () => {
     ]);
   };
 
-  const handleDeleteRow = (key) => {
-    setOrders(orders.filter((o) => o.key !== key));
+  const handleDeleteRow = (key: any) => {
+    setOrders(orders.filter((o: any) => o.key !== key));
   };
 
-  const handleRowChange = (key, field, value) => {
-    setOrders((prev) =>
-      prev.map((o) => {
+  const handleRowChange = (key: any, field: any, value: any) => {
+    setOrders((prev: any) =>
+      prev.map((o: any) => {
         if (o.key === key) {
           const updated = { ...o, [field]: value };
           updated.total = (
@@ -73,7 +70,7 @@ const SupplierOrdersPage = () => {
       title: "Наименование товара",
       dataIndex: "name",
       key: "name",
-      render: (text, record) => (
+      render: (text: any, record: any) => (
         <Input
           value={record.name}
           onChange={(e) => handleRowChange(record.key, "name", e.target.value)}
@@ -84,7 +81,7 @@ const SupplierOrdersPage = () => {
       title: "Штрих-код",
       dataIndex: "barcode",
       key: "barcode",
-      render: (text, record) => (
+      render: (text: any, record: any) => (
         <Input
           value={record.barcode}
           onChange={(e) =>
@@ -97,7 +94,7 @@ const SupplierOrdersPage = () => {
       title: "Артикул",
       dataIndex: "sku",
       key: "sku",
-      render: (text, record) => (
+      render: (text: any, record: any) => (
         <Input
           value={record.sku}
           onChange={(e) => handleRowChange(record.key, "sku", e.target.value)}
@@ -108,7 +105,7 @@ const SupplierOrdersPage = () => {
       title: "Количество",
       dataIndex: "quantity",
       key: "quantity",
-      render: (text, record) => (
+      render: (text: any, record: any) => (
         <InputNumber
           min={0}
           value={record.quantity}
@@ -120,7 +117,7 @@ const SupplierOrdersPage = () => {
       title: "Ед. измерения",
       dataIndex: "unit",
       key: "unit",
-      render: (text, record) => (
+      render: (text: any, record: any) => (
         <Select
           value={record.unit}
           onChange={(value) => handleRowChange(record.key, "unit", value)}
@@ -136,7 +133,7 @@ const SupplierOrdersPage = () => {
       title: "Цена",
       dataIndex: "price",
       key: "price",
-      render: (text, record) => (
+      render: (text: any, record: any) => (
         <InputNumber
           min={0}
           value={record.price}
@@ -148,7 +145,7 @@ const SupplierOrdersPage = () => {
       title: "Скидка %",
       dataIndex: "discount",
       key: "discount",
-      render: (text, record) => (
+      render: (text: any, record: any) => (
         <InputNumber
           min={0}
           max={100}
@@ -161,12 +158,12 @@ const SupplierOrdersPage = () => {
       title: "Общая сумма",
       dataIndex: "total",
       key: "total",
-      render: (text) => <span>{text} ₽</span>,
+      render: (text: any) => <span>{text} ₽</span>,
     },
     {
       title: "Действия",
       key: "actions",
-      render: (_, record) => (
+      render: (_: any, record: any) => (
         <Button danger onClick={() => handleDeleteRow(record.key)}>
           Удалить
         </Button>
@@ -174,7 +171,10 @@ const SupplierOrdersPage = () => {
     },
   ];
 
-  const totalSum = orders.reduce((sum, o) => sum + parseFloat(o.total || 0), 0);
+  const totalSum = orders.reduce(
+    (sum: any, o: any) => sum + parseFloat(o.total || 0),
+    0
+  );
 
   return (
     <div style={{ padding: 24 }}>
@@ -220,9 +220,7 @@ const SupplierOrdersPage = () => {
           pagination={false}
           summary={() => (
             <Table.Summary.Row>
-              <Table.Summary.Cell colSpan={7} style={{ textAlign: "right" }}>
-                Итого:
-              </Table.Summary.Cell>
+              <Table.Summary.Cell colSpan={7}>Итого:</Table.Summary.Cell>
               <Table.Summary.Cell>{totalSum.toFixed(2)} ₽</Table.Summary.Cell>
               <Table.Summary.Cell />
             </Table.Summary.Row>

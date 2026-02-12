@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Card,
   Tabs,
@@ -24,7 +24,7 @@ const mockData = [
 
 const ReportsPage = () => {
   const [reportType, setReportType] = useState("expense");
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any>([]);
   const [loading, setLoading] = useState(false);
 
   const columnsExpense = [
@@ -34,7 +34,7 @@ const ReportsPage = () => {
       title: "Сумма",
       dataIndex: "amount",
       key: "amount",
-      render: (val) => `${val} ₽`,
+      render: (val: any) => `${val} ₽`,
     },
   ];
 
@@ -45,11 +45,11 @@ const ReportsPage = () => {
       title: "Сумма",
       dataIndex: "amount",
       key: "amount",
-      render: (val) => `${val} ₽`,
+      render: (val: any) => `${val} ₽`,
     },
   ];
 
-  const handleGenerateReport = (values) => {
+  const handleGenerateReport = (values: any) => {
     setLoading(true);
     setTimeout(() => {
       // Здесь можно вызвать API для получения отчета

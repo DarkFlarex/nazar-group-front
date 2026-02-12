@@ -1,12 +1,12 @@
-import CustomerOrdersTabs from "./CustomerOrdersTabs.tsx";
+import CustomerOrdersTabs from "./CustomerOrdersTabs";
 
 const CustomerOrdersPage = () => {
-    return (
-        <>
-            <CustomerOrdersTabs/>
-         {/*<CustomerOrdersTable/>*/}
-        </>
-    );
+  return (
+    <>
+      <CustomerOrdersTabs />
+      {/*<CustomerOrdersTable/>*/}
+    </>
+  );
 };
 
 export default CustomerOrdersPage;

@@ -15,22 +15,25 @@ const CardsPageOZ = () => {
   const [loading, setLoading] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [quantityModalVisible, setQuantityModalVisible] = useState(false);
-  const [selectedCard, setSelectedCard] = useState(null);
+  const [selectedCard, setSelectedCard] = useState<any>(null);
   const [form] = Form.useForm();
   const [quantityForm] = Form.useForm();
 
   const fetchCards = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/ozon/cards/list", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await fetch(
+        "https://nazar-backend.333.kg/api/ozon/cards/list",
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       if (!res.ok) throw new Error("Ошибка сервера");
       const data = await res.json();
       if (!data.cards) throw new Error("Нет карточек");
       setCards(data.cards);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       message.error(`Ошибка загрузки карточек Ozon: ${e.message}`);
     } finally {
@@ -50,7 +53,7 @@ const CardsPageOZ = () => {
     {
       title: "Действия",
       key: "actions",
-      render: (_, record) => (
+      render: (_: any, record: any) => (
         <Space size="middle">
           <Button type="primary" onClick={() => openEditModal(record)}>
             Редактировать
@@ -71,7 +74,7 @@ const CardsPageOZ = () => {
     },
   ];
 
-  const openEditModal = (record) => {
+  const openEditModal = (record: any) => {
     setSelectedCard(record);
     form.setFieldsValue({ name: record.name || "", brand: record.brand || "" });
     setEditModalVisible(true);
@@ -84,7 +87,7 @@ const CardsPageOZ = () => {
     });
   };
 
-  const openQuantityModal = (record) => {
+  const openQuantityModal = (record: any) => {
     setSelectedCard(record);
     const qty = record.stock || 0;
     quantityForm.setFieldsValue({ quantity: qty });
@@ -100,7 +103,7 @@ const CardsPageOZ = () => {
     });
   };
 
-  const handleDelete = (record) => {
+  const handleDelete = (record: any) => {
     message.success(`Удалена карточка SKU ${record.sku}`);
   };
 

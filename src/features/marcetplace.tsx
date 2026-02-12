@@ -15,34 +15,45 @@ import {
 import type { UploadFile, UploadProps } from "antd";
 import ImgCrop from "antd-img-crop";
 
+import {
+  useGetColorsQuery,
+  useGetSubjectsQuery,
+  useGetCategoriesQuery,
+  useGetCountriesQuery,
+  useGetCharsQuery,
+} from "../store/api/wbDirectory";
+
 const { Option } = Select;
 const { Title, Text } = Typography;
 
 const MarketplaceForm = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [orderStatus, setOrderStatus] = useState<string | null>(null);
-  const [limits, setLimits] = useState<{
-    freeLimits: number;
-    paidLimits: number;
-  } | null>(null);
   const [cardResponse, setCardResponse] = useState<any>(null);
-
-  // 📸 Состояние для загрузки фото
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
-  useEffect(() => {
-    const fetchLimits = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/sandbox/cards/limits");
-        const data = await res.json();
-        if (!data.error) setLimits(data.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchLimits();
-  }, []);
+  // 📦 Загружаем все справочники один раз
+  const { data: categories = [], refetch: refetchCategory } =
+    useGetCategoriesQuery();
+  const { data: subjects = [], refetch: refetchsubjects } =
+    useGetSubjectsQuery();
+  const { data: colors = [], refetch: refetchcolors } = useGetColorsQuery();
+  const { data: countries = [], refetch: refetchcountries } =
+    useGetCountriesQuery();
+
+  // состояния для каскада
+  const [filteredSubjects, setFilteredSubjects] = useState<any>();
+
+  const { data: chars = [] } = useGetCharsQuery(filteredSubjects, {
+    skip: !filteredSubjects,
+  });
+  // Обновляем предметы при выборе категории
+  const handleCategoryChange = (categoryId: number) => {};
+
+  // Обновляем характеристики при выборе предмета
+  const handleSubjectChange = (subjectId: number) => {
+    setFilteredSubjects(subjectId);
+  };
 
   const onUploadChange: UploadProps["onChange"] = ({
     fileList: newFileList,
@@ -52,7 +63,7 @@ const MarketplaceForm = () => {
 
   const onUploadPreview = async (file: UploadFile) => {
     let src = file.url as string;
-    if (!src) {
+    if (!src && file.originFileObj) {
       src = await new Promise<string>((resolve) => {
         const reader = new FileReader();
         reader.readAsDataURL(file.originFileObj as File);
@@ -60,50 +71,16 @@ const MarketplaceForm = () => {
       });
     }
     const image = new Image();
-    image.src = src;
+    image.src = src!;
     const imgWindow = window.open(src);
     imgWindow?.document.write(image.outerHTML);
   };
 
-  const handleSubmitOrder = async (values: any) => {
-    setLoading(true);
-    setOrderStatus(null);
-
-    try {
-      if (values.marketplace === "wb") {
-        const createRes = await fetch("http://localhost:5000/wb/order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderId: values.orderId,
-            sku: values.sku,
-            quantity: values.quantity,
-            price: values.price,
-            fio: values.fio,
-            phone: values.phone,
-          }),
-        });
-        const createData = await createRes.json();
-        message.success("Заказ создан!");
-
-        const statusRes = await fetch(
-          `http://localhost:5000/wb/order/${values.orderId}`
-        );
-        const statusData = await statusRes.json();
-        setOrderStatus(JSON.stringify(statusData, null, 2));
-      }
-    } catch (error) {
-      console.error(error);
-      message.error("Ошибка при создании или отслеживании заказа!");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleCreateCard = async () => {
     const values = form.getFieldsValue();
+
     if (!values.sku) {
-      message.error("Введите SKU для карточки!");
+      message.error("Введите SKU!");
       return;
     }
 
@@ -111,30 +88,39 @@ const MarketplaceForm = () => {
     setCardResponse(null);
 
     try {
-      const images = fileList.map((f) => f.originFileObj); // или f.url, если уже загружены на сервер
+      const images = fileList.map((f) => f.originFileObj);
+
       const payload = [
         {
-          subjectID: 105,
+          subjectID: values.subjectId,
           variants: [
             {
               vendorCode: `SANDBOX-CARD-${Date.now()}`,
-              title: "Тестовая карточка через 333",
+              title: "Тестовая карто3211чка",
               brand: "SandboxBrand",
-              description: "Создано через локальный Node.js сервер",
+              description: "Создано через локальный test сервер",
+              characteristics: [
+                { id: values.charId },
+                { id: values.colorId },
+                { id: values.countryId },
+              ],
               dimensions: { length: 10, width: 10, height: 10 },
               weight: 0.3,
               sizes: [{ skus: [values.sku] }],
-              images, // добавляем фото в карточку
+              images,
             },
           ],
         },
       ];
 
-      const res = await fetch("http://localhost:5000/sandbox/cards/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        "https://nazar-backend.333.kg/api/wb/content/cards/update",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await res.json();
       setCardResponse(data);
@@ -149,32 +135,42 @@ const MarketplaceForm = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchDataSequentially = async () => {
+      await refetchCategory?.();
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      await refetchsubjects?.();
+      console.log("Subjects loaded");
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      await refetchcolors?.();
+      console.log("Colors loaded");
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      await refetchcountries?.();
+      console.log("Countries loaded");
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    };
+
+    fetchDataSequentially();
+  }, []);
+
   return (
     <Card
       style={{
-        maxWidth: 700,
         margin: "30px auto",
         borderRadius: 10,
         boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
       }}
     >
       <Title level={3} style={{ textAlign: "center", marginBottom: 20 }}>
-        Создание заказа и карточки Wildberries
+        Создание карточки Wildberries
       </Title>
 
-      {limits && (
-        <Row gutter={16} style={{ marginBottom: 20 }}>
-          <Col span={12}>
-            <Text strong>Свободные лимиты:</Text>{" "}
-            <Text>{limits.freeLimits}</Text>
-          </Col>
-          <Col span={12}>
-            <Text strong>Платные лимиты:</Text> <Text>{limits.paidLimits}</Text>
-          </Col>
-        </Row>
-      )}
-
-      {/* 🔹 Загрузка изображений */}
       <ImgCrop rotationSlider>
         <Upload
           action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
@@ -189,24 +185,6 @@ const MarketplaceForm = () => {
 
       <Form form={form} layout="vertical" style={{ marginTop: 20 }}>
         <Form.Item
-          name="marketplace"
-          label="Маркетплейс"
-          rules={[{ required: true, message: "Выберите маркетплейс" }]}
-        >
-          <Select placeholder="Выберите маркетплейс">
-            <Option value="wb">Wildberries</Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item
-          name="orderId"
-          label="ID заказа"
-          rules={[{ required: true, message: "Введите ID заказа" }]}
-        >
-          <Input placeholder="Например, TEST12345" />
-        </Form.Item>
-
-        <Form.Item
           name="sku"
           label="SKU товара"
           rules={[{ required: true, message: "Введите SKU" }]}
@@ -215,78 +193,79 @@ const MarketplaceForm = () => {
         </Form.Item>
 
         <Form.Item
-          name="quantity"
-          label="Количество"
-          rules={[{ required: true, message: "Введите количество" }]}
+          name="categoryId"
+          label="Категория"
+          rules={[{ required: true, message: "Выберите категорию" }]}
         >
-          <InputNumber min={1} style={{ width: "100%" }} />
-        </Form.Item>
-
-        <Form.Item
-          name="price"
-          label="Цена"
-          rules={[{ required: true, message: "Введите цену" }]}
-        >
-          <InputNumber min={0} style={{ width: "100%" }} />
-        </Form.Item>
-
-        <Form.Item
-          name="fio"
-          label="ФИО покупателя"
-          rules={[{ required: true, message: "Введите ФИО" }]}
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          name="phone"
-          label="Телефон"
-          rules={[{ required: true, message: "Введите телефон" }]}
-        >
-          <Input placeholder="+7 (___) ___-__-__" />
-        </Form.Item>
-
-        <Row gutter={16}>
-          <Col span={12}>
-            <Button
-              type="primary"
-              block
-              loading={loading}
-              style={{ borderRadius: 6 }}
-              onClick={() =>
-                form.submit() && handleSubmitOrder(form.getFieldsValue())
-              }
-            >
-              Создать и проверить заказ
-            </Button>
-          </Col>
-
-          <Col span={12}>
-            <Button
-              type="default"
-              block
-              loading={loading}
-              style={{ borderRadius: 6 }}
-              onClick={handleCreateCard}
-            >
-              Создать карточку WB Sandbox
-            </Button>
-          </Col>
-        </Row>
-
-        {orderStatus && (
-          <pre
-            style={{
-              background: "#f4f4f4",
-              padding: 10,
-              borderRadius: 6,
-              overflowX: "auto",
-              marginTop: 10,
-            }}
+          <Select
+            placeholder="Выберите категорию"
+            onChange={handleCategoryChange}
           >
-            {orderStatus}
-          </pre>
-        )}
+            {categories.map((c) => (
+              <Option key={c.id} value={c.id}>
+                {c.name}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          name="subjectId"
+          label="Предмет"
+          rules={[{ required: true, message: "Выберите предмет" }]}
+        >
+          <Select onChange={handleSubjectChange}>
+            {subjects.map((s: any) => (
+              <Option key={s.subjectID} value={s.subjectID}>
+                {s.subjectName}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+
+        <Form.Item name="charId" label="Характеристика">
+          <Select placeholder="Выберите характеристику">
+            {chars.map((c) => (
+              <Option key={c.id} value={c.id}>
+                {c.name}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+
+        <Form.Item name="colorId" label="Цвет">
+          <Select placeholder="Выберите цвет">
+            {colors.map((c) => (
+              <Option key={c.id} value={c.id}>
+                {c.name}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          name="countryId"
+          label="Страна"
+          rules={[{ required: true, message: "Выберите страну" }]}
+        >
+          <Select placeholder="Выберите страну">
+            {countries.map((c) => (
+              <Option key={c.id} value={c.id}>
+                {c.name}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+
+        <Button
+          type="primary"
+          block
+          loading={loading}
+          style={{ borderRadius: 6 }}
+          onClick={handleCreateCard}
+        >
+          Создать карточку WB
+        </Button>
 
         {cardResponse && (
           <pre
@@ -294,7 +273,6 @@ const MarketplaceForm = () => {
               background: "#f0f0f0",
               padding: 10,
               borderRadius: 6,
-              overflowX: "auto",
               marginTop: 10,
             }}
           >

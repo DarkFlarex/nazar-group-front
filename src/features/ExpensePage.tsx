@@ -35,7 +35,7 @@ const ExpensePage = () => {
       title: "Дата",
       dataIndex: "date",
       key: "date",
-      render: (date) => date.format("DD.MM.YYYY"),
+      render: (date: any) => date.format("DD.MM.YYYY"),
     },
     {
       title: "Контрагент",
@@ -51,7 +51,7 @@ const ExpensePage = () => {
       title: "Сумма",
       dataIndex: "amount",
       key: "amount",
-      render: (amount) => `${amount} ₽`,
+      render: (amount: any) => `${amount} ₽`,
     },
     {
       title: "Комментарий",
@@ -61,7 +61,7 @@ const ExpensePage = () => {
     {
       title: "Действия",
       key: "action",
-      render: (_, record) => (
+      render: (_: any, record: any) => (
         <Space>
           <Button type="link" onClick={() => edit(record.key)}>
             Редактировать
@@ -79,7 +79,7 @@ const ExpensePage = () => {
     },
   ];
 
-  const addExpense = (values) => {
+  const addExpense = (values: any) => {
     const newRecord = {
       key: Date.now().toString(),
       date: values.date,
@@ -92,12 +92,12 @@ const ExpensePage = () => {
     form.resetFields();
   };
 
-  const remove = (key) => {
+  const remove = (key: any) => {
     setDataSource(dataSource.filter((item) => item.key !== key));
   };
 
-  const edit = (key) => {
-    const record = dataSource.find((item) => item.key === key);
+  const edit = (key: any) => {
+    const record: any = dataSource.find((item: any) => item.key === key);
     form.setFieldsValue({
       date: record.date,
       counterparty: record.counterparty,
@@ -108,7 +108,7 @@ const ExpensePage = () => {
     setEditingKey(key);
   };
 
-  const updateExpense = (values) => {
+  const updateExpense = (values: any) => {
     setDataSource(
       dataSource.map((item) =>
         item.key === editingKey ? { ...item, ...values } : item
@@ -118,7 +118,7 @@ const ExpensePage = () => {
     form.resetFields();
   };
 
-  const onFinish = (values) => {
+  const onFinish = (values: any) => {
     if (editingKey) {
       updateExpense(values);
     } else {
@@ -173,7 +173,7 @@ const ExpensePage = () => {
             min={0}
             style={{ width: "100%" }}
             formatter={(value) => `${value} ₽`}
-            parser={(value) => value.replace(/\s?₽/g, "")}
+            parser={(value: any) => value.replace(/\s?₽/g, "")}
           />
         </Form.Item>
 

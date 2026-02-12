@@ -8,10 +8,9 @@ import PrihodGoodsTable from "./components/PrihodGoodsTable";
 import PrihodPrint from "./components/PrihodPrint";
 
 const PrihodPage = () => {
-  const printRef = useRef<HTMLDivElement>(null);
+  const printRef = useRef<any>(null);
 
   const handlePrint = useReactToPrint({
-    content: () => printRef.current,
     documentTitle: "Приходная накладная",
   });
 

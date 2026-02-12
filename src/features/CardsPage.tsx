@@ -1,40 +1,33 @@
-import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Button,
-  Space,
-  message,
-  Popconfirm,
-  Modal,
-  Input,
-  Form,
-} from "antd";
+import { useEffect, useState } from "react";
+import { Button, Space, message, Popconfirm, Modal, Input, Form } from "antd";
+import CardsList from "../pages/wbCards";
 
 const CardsPageWB = () => {
-  const [cards, setCards] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [cursor, setCursor] = useState({});
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [quantityModalVisible, setQuantityModalVisible] = useState(false);
-  const [selectedCard, setSelectedCard] = useState(null);
+  const [cards, setCards] = useState<any>([]);
+  const [cursor, setCursor] = useState<any>({});
+  const [editModalVisible, setEditModalVisible] = useState<any>(false);
+  const [quantityModalVisible, setQuantityModalVisible] = useState<any>(false);
+  const [selectedCard, setSelectedCard] = useState<any>(null);
   const [form] = Form.useForm();
   const [quantityForm] = Form.useForm();
 
   // Загрузка карточек Wildberries
   const fetchCards = async (cursorData = {}) => {
-    setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/sandbox/cards/list", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          settings: {
-            sort: { ascending: true },
-            cursor: { limit: 100, ...cursorData },
-            filter: { withPhoto: -1 },
-          },
-        }),
-      });
+      const res = await fetch(
+        "https://nazar-backend.333.kg/api/sandbox/cards/list",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            settings: {
+              sort: { ascending: true },
+              cursor: { limit: 100, ...cursorData },
+              filter: { withPhoto: -1 },
+            },
+          }),
+        }
+      );
 
       if (!res.ok) throw new Error("Сервер вернул ошибку");
 
@@ -47,11 +40,10 @@ const CardsPageWB = () => {
 
       setCards(data.cards || []);
       setCursor(data.cursor || {});
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       message.error(`Ошибка загрузки карточек: ${e.message}`);
     } finally {
-      setLoading(false);
     }
   };
 
@@ -59,57 +51,11 @@ const CardsPageWB = () => {
     fetchCards();
   }, []);
 
-  const columns = [
-    { title: "NM ID", dataIndex: "nmID", key: "nmID" },
-    { title: "Название", dataIndex: "title", key: "title" },
-    { title: "Бренд", dataIndex: "brand", key: "brand" },
-    { title: "Категория", dataIndex: "subjectName", key: "subjectName" },
-    { title: "Артикул", dataIndex: "vendorCode", key: "vendorCode" },
-    {
-      title: "Действия",
-      key: "actions",
-      render: (_, record) => (
-        <Space size="middle">
-          <Button type="primary" onClick={() => openEditModal(record)}>
-            Редактировать
-          </Button>
-          <Popconfirm
-            title="Вы уверены?"
-            onConfirm={() => handleDelete(record)}
-            okText="Да"
-            cancelText="Нет"
-          >
-            <Button danger>Удалить</Button>
-          </Popconfirm>
-          <Button onClick={() => openQuantityModal(record)}>
-            Изменить кол-во
-          </Button>
-        </Space>
-      ),
-    },
-  ];
-
-  const openEditModal = (record) => {
-    setSelectedCard(record);
-    form.setFieldsValue({
-      title: record.title || "",
-      brand: record.brand || "",
-    });
-    setEditModalVisible(true);
-  };
-
   const handleEditSave = () => {
-    form.validateFields().then((values) => {
+    form.validateFields().then(() => {
       message.success(`Сохранили карточку ${selectedCard.nmID}`);
       setEditModalVisible(false);
     });
-  };
-
-  const openQuantityModal = (record) => {
-    setSelectedCard(record);
-    const qty = record.sizes?.[0]?.skus?.length || 0;
-    quantityForm.setFieldsValue({ quantity: qty });
-    setQuantityModalVisible(true);
   };
 
   const handleQuantitySave = () => {
@@ -121,10 +67,6 @@ const CardsPageWB = () => {
     });
   };
 
-  const handleDelete = (record) => {
-    message.success(`Удалена карточка ${record.nmID}`);
-  };
-
   const loadNextPage = () => {
     if (cursor && cursor.nmID) {
       fetchCards({ updatedAt: cursor.updatedAt, nmID: cursor.nmID });
@@ -134,13 +76,7 @@ const CardsPageWB = () => {
   return (
     <div style={{ padding: 20 }}>
       <h1>Список карточек Wildberries</h1>
-      <Table
-        rowKey="nmID"
-        columns={columns}
-        dataSource={cards}
-        loading={loading}
-        pagination={false}
-      />
+      <CardsList />
       {cursor?.total > cards.length && (
         <div style={{ marginTop: 16, textAlign: "right" }}>
           <Button onClick={loadNextPage}>Загрузить ещё</Button>
