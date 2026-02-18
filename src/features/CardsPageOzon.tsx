@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   Button,
@@ -81,7 +81,7 @@ const CardsPageOZ = () => {
   };
 
   const handleEditSave = () => {
-    form.validateFields().then((values) => {
+    form.validateFields().then(() => {
       message.success(`Сохранили карточку SKU ${selectedCard.sku}`);
       setEditModalVisible(false);
     });

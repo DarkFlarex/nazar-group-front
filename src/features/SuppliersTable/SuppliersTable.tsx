@@ -3,38 +3,20 @@ import { useState } from "react";
 import SuppliersTableNewForm from "./SuppliersTableNewForm";
 import SuppliersTableEditForm from "./SuppliersTableEditForm";
 import type { SupplierFormValues } from "./components/SuppliersTableForm";
-
-interface Supplier extends SupplierFormValues {
-  key: string;
-  code: string;
-}
-
-const initialData: Supplier[] = [
-  {
-    key: "1",
-    code: "SUP-0001",
-    title: "ОсОО ЭлектроСнаб",
-    address: "г. Бишкек, ул. Ленина 10",
-    contacts: "+996 700 111 222",
-  },
-];
-
-const generateSupplierCode = (index: number) => {
-  return `SUP-${String(index).padStart(4, "0")}`;
-};
+import { useGetManufacturersQuery } from "../../store/api/directoryApi";
 
 const columns = (
-  onEdit: (record: Supplier) => void,
-  onDelete: (key: string) => void
+  onEdit: (record: any) => void,
+  onDelete: (key: any) => void
 ) => [
-  { title: "Код", dataIndex: "code" },
-  { title: "Наименование", dataIndex: "title" },
-  { title: "Адрес", dataIndex: "address" },
+  { title: "Код", dataIndex: "codeid" },
+  { title: "Наименование", dataIndex: "Наименование" },
+  { title: "Адрес", dataIndex: "created_at" },
   { title: "Контакты", dataIndex: "contacts" },
   {
     title: "Действия",
     key: "action",
-    render: (_: unknown, record: Supplier) => (
+    render: (_: unknown, record: any) => (
       <>
         <Button type="link" onClick={() => onEdit(record)}>
           Редактировать
@@ -53,42 +35,32 @@ const columns = (
 ];
 
 const SuppliersTable = () => {
-  const [dataSource, setDataSource] = useState<Supplier[]>(initialData);
+  const { data: dataSource } = useGetManufacturersQuery();
   const [openNew, setOpenNew] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
-  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+  const [editingSupplier, setEditingSupplier] = useState<any | null>(null);
 
   const handleAdd = () => setOpenNew(true);
 
-  const handleEdit = (supplier: Supplier) => {
+  const handleEdit = (supplier: any) => {
     setEditingSupplier(supplier);
     setOpenEdit(true);
   };
 
-  const handleDelete = (key: string) => {
-    setDataSource((prev) => prev.filter((item) => item.key !== key));
+  const handleDelete = (key: any) => {
+    console.log(key);
   };
 
-  const handleNewSubmit = (values: SupplierFormValues) => {
-    setDataSource((prev) => {
-      const newSupplier: Supplier = {
-        key: Date.now().toString(),
-        code: generateSupplierCode(prev.length + 1),
-        ...values,
-      };
-      return [...prev, newSupplier];
-    });
+  const handleNewSubmit = (values: any) => {
+    console.log(values);
+
     setOpenNew(false);
   };
 
   const handleEditSubmit = (values: SupplierFormValues) => {
     if (!editingSupplier) return;
 
-    setDataSource((prev) =>
-      prev.map((item) =>
-        item.key === editingSupplier.key ? { ...item, ...values } : item
-      )
-    );
+    console.log(values);
 
     setOpenEdit(false);
     setEditingSupplier(null);

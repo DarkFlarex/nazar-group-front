@@ -1,4 +1,3 @@
-import React from "react";
 import { Table, Tag, Collapse } from "antd";
 import { useGetOzonPostQuery } from "../store/api/wbOrdersApi";
 
@@ -101,11 +100,18 @@ const PostingsTable = () => {
   );
 
   return (
-    <div style={{ padding: 24 }}>
-      <h2>Список поставок 2</h2>
+    <div
+      style={{
+        padding: 24,
+        overflow: "scroll",
+        maxHeight: "calc(100vh - 200px)",
+      }}
+    >
+      <h2>Список поставок</h2>
       <Table
         dataSource={postingsData.result.postings}
         columns={columns}
+        rowKey="posting_number"
         pagination={{ pageSize: 100 }}
         expandable={{ expandedRowRender }}
       />

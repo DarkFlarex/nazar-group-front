@@ -34,8 +34,13 @@ export const wbDictionariesApi = createApi({
       query: (id) => "/wb/content/charcs/" + id,
     }),
 
-    getSubjects: builder.query<any[], void>({
-      query: () => "/wb/content/all",
+    getSubjects: builder.query<any, any>({
+      query: (data: any) => {
+        return {
+          url: "/wb/content/all",
+          params: data,
+        };
+      },
     }),
 
     getCountries: builder.query<WbCountry[], void>({

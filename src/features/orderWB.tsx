@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Card, Tag, List, Button, Space, Popconfirm, message } from "antd";
+import { Card, Tag, List, Button, Space, Popconfirm } from "antd";
 import { useGetWBOrdersQuery } from "../store/api/wbOrdersApi";
 
 const initialOrders = [

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Card,
   Tabs,
@@ -19,55 +19,18 @@ const { RangePicker } = DatePicker;
 
 const STATUS_TABS = [
   { key: "all", label: "Все" },
-  { key: "processing", label: "В обработке" },
-  { key: "delivered", label: "Выполнено" },
-  { key: "cancelled", label: "Отклонено" },
+  { key: "awaiting_packaging", label: "Ожидает упаковки" },
+  { key: "delivering", label: "Доставляется" },
+  { key: "delivered", label: "Доставлен" },
+  { key: "cancelled", label: "Отменён" },
 ];
 
 const statusColor: Record<string, string> = {
-  processing: "blue",
+  awaiting_packaging: "orange",
+  delivering: "blue",
   delivered: "green",
   cancelled: "red",
 };
-
-const MOCK_ORDERS = [
-  {
-    order_id: "10001",
-    order_number: "OZ-54321",
-    created_at: "2026-02-01T10:30:00",
-    sku: "5032779495645",
-    quantity: 1,
-    price: 2999,
-    status: "processing",
-  },
-  {
-    order_id: "10002",
-    order_number: "OZ-54322",
-    created_at: "2026-02-02T14:12:00",
-    sku: "5032779495652",
-    quantity: 2,
-    price: 5490,
-    status: "delivered",
-  },
-  {
-    order_id: "10003",
-    order_number: "OZ-54323",
-    created_at: "2026-02-03T09:05:00",
-    sku: "88005553533245",
-    quantity: 1,
-    price: 1990,
-    status: "cancelled",
-  },
-  {
-    order_id: "10004",
-    order_number: "OZ-54324",
-    created_at: "2026-02-04T18:40:00",
-    sku: "5032781145187",
-    quantity: 3,
-    price: 8990,
-    status: "processing",
-  },
-];
 
 const OzonOrders = () => {
   const [view, setView] = useState<"table" | "cards">("table");
@@ -78,20 +41,59 @@ const OzonOrders = () => {
     dayjs(),
   ]);
 
-  const { data = MOCK_ORDERS, isLoading, error } = useGetOzonOrdersQuery();
+  const { data, isLoading, error } = useGetOzonOrdersQuery();
 
-  const orders = useMemo(() => data?.result || [], [data]);
+  // ✅ Нормализация данных
+  const orders = useMemo(() => {
+    const postings = data?.postings || [];
+
+    const mapped = postings.map((p: any) => {
+      const firstProduct = p.products?.[0];
+      const firstFinancial = p.financial_data?.products?.[0];
+
+      return {
+        ...p,
+        key: p.posting_number,
+        created_at: p.in_process_at,
+        sku: firstProduct?.sku,
+        product_name: firstProduct?.name,
+        quantity: firstProduct?.quantity,
+        price: firstFinancial?.price,
+        customer_price: firstFinancial?.customer_price,
+        warehouse: p.delivery_method?.warehouse,
+        delivery_type: p.analytics_data?.delivery_type,
+      };
+    });
+
+    if (status === "all") return mapped;
+
+    return mapped.filter((o: any) => o.status === status);
+  }, [data, status]);
 
   const columns = [
     {
-      title: "№ заказа",
+      title: "Отправление",
+      dataIndex: "posting_number",
+      key: "posting_number",
+    },
+    {
+      title: "Заказ",
       dataIndex: "order_number",
       key: "order_number",
     },
     {
-      title: "Дата",
+      title: "Дата обработки",
       dataIndex: "created_at",
       render: (v: string) => dayjs(v).format("DD.MM.YYYY HH:mm"),
+    },
+    {
+      title: "Склад",
+      dataIndex: "warehouse",
+    },
+    {
+      title: "Товар",
+      dataIndex: "product_name",
+      ellipsis: true,
     },
     {
       title: "SKU",
@@ -102,14 +104,23 @@ const OzonOrders = () => {
       dataIndex: "quantity",
     },
     {
-      title: "Сумма",
+      title: "Цена",
       dataIndex: "price",
       render: (v: number) => `${v} ₽`,
     },
     {
+      title: "Оплатил клиент",
+      dataIndex: "customer_price",
+      render: (v: number) => `${v} ₽`,
+    },
+    {
+      title: "Тип доставки",
+      dataIndex: "delivery_type",
+    },
+    {
       title: "Статус",
       dataIndex: "status",
-      render: (v: string) => <Tag color={statusColor[v]}>{v}</Tag>,
+      render: (v: string) => <Tag color={statusColor[v] || "default"}>{v}</Tag>,
     },
   ];
 
@@ -142,7 +153,7 @@ const OzonOrders = () => {
         </Col>
       </Row>
 
-      {/* Табы */}
+      {/* Табы статусов */}
       <Tabs activeKey={status} onChange={setStatus} items={STATUS_TABS} />
 
       {/* Контент */}
@@ -152,27 +163,48 @@ const OzonOrders = () => {
         <Table
           columns={columns}
           dataSource={orders}
-          rowKey="order_id"
+          rowKey="posting_number"
           pagination={{ pageSize: 20 }}
-          scroll={{ x: 1200 }}
+          scroll={{ x: 1400 }}
+          expandable={{
+            expandedRowRender: (record: any) => (
+              <div>
+                <Text strong>Все товары:</Text>
+                {record.products?.map((prod: any) => (
+                  <div key={prod.sku}>
+                    {prod.name} — {prod.quantity} шт.
+                  </div>
+                ))}
+              </div>
+            ),
+          }}
         />
       ) : (
         <Row gutter={[16, 16]}>
           {orders.map((order: any) => (
-            <Col xs={24} sm={12} md={8} lg={6} key={order.order_id}>
+            <Col xs={24} sm={12} md={8} lg={6} key={order.posting_number}>
               <Card hoverable>
-                <Text strong>№ заказа:</Text> {order.order_number}
+                <Text strong>Отправление:</Text> {order.posting_number}
+                <br />
+                <Text strong>Заказ:</Text> {order.order_number}
                 <br />
                 <Text strong>Дата:</Text>{" "}
-                {dayjs(order.created_at).format("DD.MM.YYYY")}
+                {dayjs(order.created_at).format("DD.MM.YYYY HH:mm")}
+                <br />
+                <Text strong>Товар:</Text> {order.product_name}
                 <br />
                 <Text strong>SKU:</Text> {order.sku}
                 <br />
                 <Text strong>Кол-во:</Text> {order.quantity}
                 <br />
-                <Text strong>Сумма:</Text> {order.price} ₽
+                <Text strong>Цена:</Text> {order.price} ₽
                 <br />
-                <Tag color={statusColor[order.status]} style={{ marginTop: 8 }}>
+                <Text strong>Клиент оплатил:</Text> {order.customer_price} ₽
+                <br />
+                <Tag
+                  color={statusColor[order.status] || "default"}
+                  style={{ marginTop: 8 }}
+                >
                   {order.status}
                 </Tag>
               </Card>
@@ -183,7 +215,7 @@ const OzonOrders = () => {
 
       {orders.length > 0 && (
         <div style={{ marginTop: 12 }}>
-          <Text type="secondary">Всего заказов: {orders.length}</Text>
+          <Text type="secondary">Всего отправлений: {orders.length}</Text>
         </div>
       )}
     </Card>

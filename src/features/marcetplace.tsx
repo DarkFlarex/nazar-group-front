@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Form,
   Input,
-  InputNumber,
   Button,
   Select,
   message,
   Card,
-  Row,
-  Col,
   Typography,
   Upload,
 } from "antd";
@@ -24,19 +21,21 @@ import {
 } from "../store/api/wbDirectory";
 
 const { Option } = Select;
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const MarketplaceForm = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [cardResponse, setCardResponse] = useState<any>(null);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [formData, setFormData] = useState<any>({});
 
   // 📦 Загружаем все справочники один раз
   const { data: categories = [], refetch: refetchCategory } =
     useGetCategoriesQuery();
-  const { data: subjects = [], refetch: refetchsubjects } =
-    useGetSubjectsQuery();
+  const { data: subjects = [], refetch: refetchsubjects } = useGetSubjectsQuery(
+    { parentID: formData.category }
+  );
   const { data: colors = [], refetch: refetchcolors } = useGetColorsQuery();
   const { data: countries = [], refetch: refetchcountries } =
     useGetCountriesQuery();
@@ -48,7 +47,9 @@ const MarketplaceForm = () => {
     skip: !filteredSubjects,
   });
   // Обновляем предметы при выборе категории
-  const handleCategoryChange = (categoryId: number) => {};
+  const handleCategoryChange = (value: any) => {
+    setFormData({ category: value });
+  };
 
   // Обновляем характеристики при выборе предмета
   const handleSubjectChange = (subjectId: number) => {

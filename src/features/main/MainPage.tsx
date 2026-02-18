@@ -9,7 +9,6 @@ import SideBar from "../../UI/SideBar/SideBar";
 import SideBarClientsTable from "../SideBarClientsTable/SideBarClientsTable";
 import SideBarProductsTable from "../SideBarProductsTable/SideBarProductsTable";
 import SuppliersTable from "../SuppliersTable/SuppliersTable";
-import { mockProducts, type Product } from "../../types/products";
 import CustomerOrdersPage from "../CustomerOrders/CustomerOrdersPage";
 import PrihodPage from "../PrihodPage/PrihodPage";
 import MarketplaceForm from "../marcetplace";
@@ -26,14 +25,12 @@ import OzonProductList from "../../pages/OzonProductList";
 import CardsListWB from "../../pages/wbCards";
 import OzonOrders from "../../pages/OzonOrders";
 import SupplyTable from "../../pages/SupplyTable";
-import { useState } from "react";
 import PostingsTable from "../../pages/PostingsTable";
+import StocksQoanPage from "../../pages/OzonStockQuan";
 
 const { Content } = Layout;
 
 const MainPage = () => {
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-
   return (
     <Router>
       <Layout style={{ minHeight: "100vh" }}>
@@ -61,12 +58,7 @@ const MainPage = () => {
               />
               <Route
                 path="/directories/products"
-                element={
-                  <SideBarProductsTable
-                    products={products}
-                    setProducts={setProducts}
-                  />
-                }
+                element={<SideBarProductsTable />}
               />
               <Route path="/reports/main" element={<ReportsPage />} />
               <Route path="/directories/categories" element={<Category />} />
@@ -80,6 +72,11 @@ const MainPage = () => {
                 path="/market/OzonStatus"
                 element={<OzonProductImportStatus />}
               />
+              <Route
+                path="/market/StocksQoanPage"
+                element={<StocksQoanPage />}
+              />
+
               <Route path="/orders/orderWb" element={<OrdersWBPage />} />
               <Route path="/orders/OrderOzon" element={<OzonOrders />} />
               <Route

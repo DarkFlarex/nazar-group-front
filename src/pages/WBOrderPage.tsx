@@ -34,9 +34,6 @@ const WbOrdersPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [statusFilter, setStatusFilter] = useState<OrderStatus>("in_process");
 
-  const startDate = dateRange[0].format("YYYY-MM-DD");
-  const endDate = dateRange[1].format("YYYY-MM-DD");
-
   const { data, isLoading, isError, refetch } = useGetWBOrdersQuery();
 
   /** 👉 добавляем статус по умолчанию */

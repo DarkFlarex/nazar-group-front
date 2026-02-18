@@ -70,89 +70,112 @@ const SupplierOrdersPage = () => {
       title: "Наименование товара",
       dataIndex: "name",
       key: "name",
-      render: (text: any, record: any) => (
-        <Input
-          value={record.name}
-          onChange={(e) => handleRowChange(record.key, "name", e.target.value)}
-        />
-      ),
+      render: (text: any, record: any) => {
+        console.log(text);
+        return (
+          <Input
+            value={record.name}
+            onChange={(e) =>
+              handleRowChange(record.key, "name", e.target.value)
+            }
+          />
+        );
+      },
     },
     {
       title: "Штрих-код",
       dataIndex: "barcode",
       key: "barcode",
-      render: (text: any, record: any) => (
-        <Input
-          value={record.barcode}
-          onChange={(e) =>
-            handleRowChange(record.key, "barcode", e.target.value)
-          }
-        />
-      ),
+      render: (text: any, record: any) => {
+        console.log(text);
+        return (
+          <Input
+            value={record.barcode}
+            onChange={(e) =>
+              handleRowChange(record.key, "barcode", e.target.value)
+            }
+          />
+        );
+      },
     },
     {
       title: "Артикул",
       dataIndex: "sku",
       key: "sku",
-      render: (text: any, record: any) => (
-        <Input
-          value={record.sku}
-          onChange={(e) => handleRowChange(record.key, "sku", e.target.value)}
-        />
-      ),
+      render: (text: any, record: any) => {
+        console.log(text);
+        return (
+          <Input
+            value={record.sku}
+            onChange={(e) => handleRowChange(record.key, "sku", e.target.value)}
+          />
+        );
+      },
     },
     {
       title: "Количество",
       dataIndex: "quantity",
       key: "quantity",
-      render: (text: any, record: any) => (
-        <InputNumber
-          min={0}
-          value={record.quantity}
-          onChange={(value) => handleRowChange(record.key, "quantity", value)}
-        />
-      ),
+      render: (text: any, record: any) => {
+        console.log(text);
+        return (
+          <InputNumber
+            min={0}
+            value={record.quantity}
+            onChange={(value) => handleRowChange(record.key, "quantity", value)}
+          />
+        );
+      },
     },
     {
       title: "Ед. измерения",
       dataIndex: "unit",
       key: "unit",
-      render: (text: any, record: any) => (
-        <Select
-          value={record.unit}
-          onChange={(value) => handleRowChange(record.key, "unit", value)}
-          style={{ width: 80 }}
-        >
-          <Option value="шт">шт</Option>
-          <Option value="кг">кг</Option>
-          <Option value="л">л</Option>
-        </Select>
-      ),
+      render: (text: any, record: any) => {
+        console.log(text);
+        return (
+          <Select
+            value={record.unit}
+            onChange={(value) => handleRowChange(record.key, "unit", value)}
+            style={{ width: 80 }}
+          >
+            <Option value="шт">шт</Option>
+            <Option value="кг">кг</Option>
+            <Option value="л">л</Option>
+          </Select>
+        );
+      },
     },
     {
       title: "Цена",
       dataIndex: "price",
       key: "price",
-      render: (text: any, record: any) => (
-        <InputNumber
-          min={0}
-          value={record.price}
-          onChange={(value) => handleRowChange(record.key, "price", value)}
-        />
-      ),
+      render: (text: any, record: any) => {
+        console.log(text);
+        return (
+          <InputNumber
+            min={0}
+            value={record.price}
+            onChange={(value) => handleRowChange(record.key, "price", value)}
+          />
+        );
+      },
     },
     {
       title: "Скидка %",
       dataIndex: "discount",
       key: "discount",
-      render: (text: any, record: any) => (
-        <InputNumber
-          min={0}
-          max={100}
-          value={record.discount}
-          onChange={(value) => handleRowChange(record.key, "discount", value)}
-        />
-      ),
+      render: (text: any, record: any) => {
+        console.log(text);
+        return (
+          <InputNumber
+            min={0}
+            max={100}
+            value={record.discount}
+            onChange={(value) => handleRowChange(record.key, "discount", value)}
+          />
+        );
+      },
     },
     {
       title: "Общая сумма",

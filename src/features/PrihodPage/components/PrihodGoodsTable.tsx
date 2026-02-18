@@ -1,4 +1,4 @@
-import { Table, InputNumber, Button } from "antd";
+import { Table, Button } from "antd";
 import { useState } from "react";
 
 export interface GoodsItem {
@@ -15,7 +15,7 @@ interface Props {
 }
 
 const PrihodGoodsTable = ({ items, onAdd }: Props) => {
-  const [qty, setQty] = useState(1);
+  const [qty] = useState(1);
 
   const addRow = () => {
     const price = 3200;

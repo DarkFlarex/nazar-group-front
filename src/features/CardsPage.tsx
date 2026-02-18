@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Space, message, Popconfirm, Modal, Input, Form } from "antd";
+import { Button, message, Modal, Input, Form } from "antd";
 import CardsList from "../pages/wbCards";
 
 const CardsPageWB = () => {
@@ -7,7 +7,7 @@ const CardsPageWB = () => {
   const [cursor, setCursor] = useState<any>({});
   const [editModalVisible, setEditModalVisible] = useState<any>(false);
   const [quantityModalVisible, setQuantityModalVisible] = useState<any>(false);
-  const [selectedCard, setSelectedCard] = useState<any>(null);
+  const [selectedCard] = useState<any>(null);
   const [form] = Form.useForm();
   const [quantityForm] = Form.useForm();
 

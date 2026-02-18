@@ -4,10 +4,6 @@ import Sider from "antd/es/layout/Sider";
 import { BarsOutlined, SnippetsOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 
-interface SideBarProps {
-  selectedKey: string;
-}
-
 const menuItems = [
   {
     key: "/orders",
@@ -34,6 +30,7 @@ const menuItems = [
     children: [
       { key: "/market/wildberis", label: "Валберс" },
       { key: "/market/OzonStatus", label: "Ozon проверка" },
+      { key: "/market/StocksQoanPage", label: "Количество на складе" },
       { key: "/market/OzonProductForm", label: "Ozon" },
       { key: "/market/cardsmerket", label: "Карточки Валберс" },
       { key: "/market/OzonProductList", label: "Карточки Ozon" },

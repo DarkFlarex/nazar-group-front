@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Card,
   Form,
@@ -21,7 +21,6 @@ const OzonProductList = () => {
   const [form] = Form.useForm();
   const [getProductList, { isLoading }] = useGetProductListMutation();
   const [products, setProducts] = useState<any[]>([]);
-  const [lastId, setLastId] = useState<string | null>(null);
   const [total, setTotal] = useState<number>(0);
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [tabKey, setTabKey] = useState<"all" | "fbo" | "fbs">("all");
@@ -40,7 +39,6 @@ const OzonProductList = () => {
     try {
       const res = await getProductList(payload).unwrap();
       setProducts(res.result.items || []);
-      setLastId(res.result.last_id || null);
       setTotal(res.result.total || 0);
     } catch (e) {
       console.error(e);

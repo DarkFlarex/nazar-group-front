@@ -3,6 +3,8 @@ import { ozonBaseApi } from "./api/ozonBaseApi";
 import { wbDictionariesApi } from "./api/wbDirectory";
 import { cardsApi } from "./api/cardsApi";
 import { wbOrderApi } from "./api/wbOrdersApi";
+import { goodsApi } from "./api/goodsApi";
+import { directoryApi } from "./api/directoryApi";
 
 export const store = configureStore({
   reducer: {
@@ -10,12 +12,16 @@ export const store = configureStore({
     [wbDictionariesApi.reducerPath]: wbDictionariesApi.reducer,
     [cardsApi.reducerPath]: cardsApi.reducer,
     [wbOrderApi.reducerPath]: wbOrderApi.reducer,
+    [goodsApi.reducerPath]: goodsApi.reducer,
+    [directoryApi.reducerPath]: directoryApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       ozonBaseApi.middleware,
       wbDictionariesApi.middleware,
       cardsApi.middleware,
-      wbOrderApi.middleware
+      wbOrderApi.middleware,
+      goodsApi.middleware,
+      directoryApi.middleware
     ),
 });

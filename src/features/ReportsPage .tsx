@@ -49,7 +49,7 @@ const ReportsPage = () => {
     },
   ];
 
-  const handleGenerateReport = (values: any) => {
+  const handleGenerateReport = () => {
     setLoading(true);
     setTimeout(() => {
       // Здесь можно вызвать API для получения отчета
