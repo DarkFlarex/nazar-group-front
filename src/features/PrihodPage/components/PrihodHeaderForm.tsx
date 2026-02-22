@@ -1,12 +1,21 @@
-import { Form, Input, Select, DatePicker, InputNumber, Row, Col } from "antd";
-import dayjs from "dayjs";
+import React, { useState } from "react";
+import {
+  Form,
+  Input,
+  Select,
+  DatePicker,
+  InputNumber,
+  Row,
+  Col,
+} from "antd";
+import dayjs, { Dayjs } from "dayjs";
 
 export interface HeaderValues {
   docNumber: string;
-  docDate: string;
+  docDate: Dayjs;
   supplier: string;
   warehouse: string;
-  currency: "USD" | "KGS";
+  currency: "KGS" | "USD";
   rate: number;
   responsible: string;
   comment?: string;
@@ -16,15 +25,15 @@ interface Props {
   onChange: (values: HeaderValues) => void;
 }
 
-const PrihodHeaderForm = ({ onChange }: Props) => {
-  const [form] = Form.useForm();
+const PrihodHeaderForm: React.FC<Props> = ({ onChange }) => {
+  const [form] = Form.useForm<HeaderValues>();
 
-  const handleChange = () => {
-    onChange(form.getFieldsValue());
+  const handleValuesChange = (_: any, allValues: HeaderValues) => {
+    onChange(allValues);
   };
 
   return (
-    <Form
+    <Form<HeaderValues>
       form={form}
       layout="vertical"
       initialValues={{
@@ -33,7 +42,7 @@ const PrihodHeaderForm = ({ onChange }: Props) => {
         currency: "KGS",
         rate: 1,
       }}
-      onValuesChange={handleChange}
+      onValuesChange={handleValuesChange}
     >
       <Row gutter={16}>
         <Col span={4}>
@@ -55,7 +64,12 @@ const PrihodHeaderForm = ({ onChange }: Props) => {
             rules={[{ required: true }]}
           >
             <Select placeholder="Выберите поставщика">
-              <Select.Option value="auto">ОсОО AutoParts KG</Select.Option>
+              <Select.Option value="supplier1">
+                ОсОО AutoParts KG
+              </Select.Option>
+              <Select.Option value="supplier2">
+                Auto Import
+              </Select.Option>
             </Select>
           </Form.Item>
         </Col>
