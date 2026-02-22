@@ -75,6 +75,7 @@ const SideBar = () => {
   return (
     <Sider width={200} style={{ background: colorBgContainer }}>
       <Menu
+        theme="dark"
         mode="inline"
         defaultOpenKeys={menuItems.map((item) => item.key)}
         style={{ height: "100%", borderRight: 0 }}

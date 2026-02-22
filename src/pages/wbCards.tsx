@@ -86,11 +86,31 @@ const CardsListWB = () => {
                 <Text>{card.nmID}</Text>
                 <br />
                 <Text strong>Размеры: </Text>
-                <Text>{`Д: ${card.dimensions.length}, Ш: ${card.dimensions.width}, В: ${card.dimensions.height}, Вес: ${card.dimensions.weightBrutto}`}</Text>
+                <Text>{`Д: ${card.dimensions.length || 0}, Ш: ${
+                  card.dimensions.width || 0
+                }, В: ${card.dimensions.height || 0}, Вес: ${
+                  card.dimensions.weightBrutto || 0
+                } кг`}</Text>
                 <br />
                 <Text strong>SKU: </Text>
                 <Text>
                   {card.sizes.map((s: any) => s.skus.join(", ")).join("; ")}
+                </Text>
+                <br />
+                <Text strong>Описание: </Text>
+                <Text>{card.description || "-"}</Text>
+                <br />
+                <Text strong>Характеристики:</Text>
+                <ul>
+                  {card.characteristics.map((ch: any) => (
+                    <li key={ch.id}>
+                      {ch.name}: {ch?.value}
+                    </li>
+                  ))}
+                </ul>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Создано: {new Date(card.createdAt).toLocaleDateString()} |
+                  Обновлено: {new Date(card.updatedAt).toLocaleDateString()}
                 </Text>
               </Card>
             </Col>

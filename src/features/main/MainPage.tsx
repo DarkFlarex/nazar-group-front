@@ -1,4 +1,4 @@
-import { Layout } from "antd";
+import { Layout, ConfigProvider } from "antd";
 import {
   BrowserRouter as Router,
   Routes,
@@ -27,78 +27,84 @@ import OzonOrders from "../../pages/OzonOrders";
 import SupplyTable from "../../pages/SupplyTable";
 import PostingsTable from "../../pages/PostingsTable";
 import StocksQoanPage from "../../pages/OzonStockQuan";
+import WbOrdersPage from "../../pages/WBOrderPage";
 
 const { Content } = Layout;
 
 const MainPage = () => {
   return (
-    <Router>
-      <Layout style={{ minHeight: "100vh" }}>
-        <SideBar />
+    <ConfigProvider theme={{}}>
+      <Router>
+        <Layout style={{ minHeight: "100vh" }}>
+          <SideBar />
 
-        <Layout>
-          <Content style={{ padding: 5 }}>
-            <Routes>
-              <Route path="/invoices/prihod" element={<PrihodPage />} />
-              <Route path="/invoices/rashod" element={<ExpensePage />} />
-              <Route path="/market/wildberis" element={<MarketplaceForm />} />
-              <Route path="/market/cardsmerket" element={<CardsListWB />} />
-              <Route path="/market/ozonCards" element={<CardsPageOZ />} />
-              <Route
-                path="/invoices/customerOrdersPage"
-                element={<CustomerOrdersPage />}
-              />
-              <Route
-                path="/directories/clients"
-                element={<SideBarClientsTable />}
-              />
-              <Route
-                path="/market/OzonProductList"
-                element={<OzonProductList />}
-              />
-              <Route
-                path="/directories/products"
-                element={<SideBarProductsTable />}
-              />
-              <Route path="/reports/main" element={<ReportsPage />} />
-              <Route path="/directories/categories" element={<Category />} />
-              <Route path="/categories" element={<CategoriesPage />} />
-              <Route
-                path="/directories/suppliers"
-                element={<SuppliersTable />}
-              />
-              <Route path="/orders/orderWB" element={<OrdersWBPage />} />
-              <Route
-                path="/market/OzonStatus"
-                element={<OzonProductImportStatus />}
-              />
-              <Route
-                path="/market/StocksQoanPage"
-                element={<StocksQoanPage />}
-              />
+          <Layout>
+            <Content style={{ padding: 5 }}>
+              <Routes>
+                <Route path="/invoices/prihod" element={<PrihodPage />} />
+                <Route path="/invoices/rashod" element={<ExpensePage />} />
+                <Route path="/market/wildberis" element={<MarketplaceForm />} />
+                <Route path="/market/cardsmerket" element={<CardsListWB />} />
+                <Route path="/market/ozonCards" element={<CardsPageOZ />} />
+                <Route
+                  path="/invoices/customerOrdersPage"
+                  element={<CustomerOrdersPage />}
+                />
+                <Route
+                  path="/directories/clients"
+                  element={<SideBarClientsTable />}
+                />
+                <Route
+                  path="/market/OzonProductList"
+                  element={<OzonProductList />}
+                />
+                <Route
+                  path="/directories/products"
+                  element={<SideBarProductsTable />}
+                />
+                <Route path="/reports/main" element={<ReportsPage />} />
+                <Route path="/directories/categories" element={<Category />} />
+                <Route path="/categories" element={<CategoriesPage />} />
+                <Route
+                  path="/directories/suppliers"
+                  element={<SuppliersTable />}
+                />
+                <Route path="/orders/orderWB" element={<WbOrdersPage />} />
+                <Route
+                  path="/market/OzonStatus"
+                  element={<OzonProductImportStatus />}
+                />
+                <Route
+                  path="/market/StocksQoanPage"
+                  element={<StocksQoanPage />}
+                />
 
-              <Route path="/orders/orderWb" element={<OrdersWBPage />} />
-              <Route path="/orders/OrderOzon" element={<OzonOrders />} />
-              <Route
-                path="/orders/orderSuplier"
-                element={<SupplierOrdersPage />}
-              />
-              <Route
-                path="/market/OzonProductForm"
-                element={<OzonProductForm />}
-              />
-              <Route path="/supply/SupplyTable" element={<SupplyTable />} />
-              <Route path="/supply/PostingsOzon" element={<PostingsTable />} />
+                <Route path="/orders/orderWb" element={<OrdersWBPage />} />
+                <Route path="/orders/OrderOzon" element={<OzonOrders />} />
+                <Route
+                  path="/orders/orderSuplier"
+                  element={<SupplierOrdersPage />}
+                />
+                <Route
+                  path="/market/OzonProductForm"
+                  element={<OzonProductForm />}
+                />
+                <Route path="/supply/SupplyTable" element={<SupplyTable />} />
+                <Route
+                  path="/supply/PostingsOzon"
+                  element={<PostingsTable />}
+                />
 
-              <Route
-                path="*"
-                element={<Navigate to="/invoices/customerOrdersPage" />}
-              />
-            </Routes>
-          </Content>
+                <Route
+                  path="*"
+                  element={<Navigate to="/invoices/customerOrdersPage" />}
+                />
+              </Routes>
+            </Content>
+          </Layout>
         </Layout>
-      </Layout>
-    </Router>
+      </Router>
+    </ConfigProvider>
   );
 };
 

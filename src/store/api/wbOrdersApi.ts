@@ -34,6 +34,21 @@ export const wbOrderApi = createApi({
         };
       },
     }),
+
+    getWBOrdersNew: builder.query<any, void>({
+      query: () => {
+        return {
+          url: "/wb/orders/new",
+        };
+      },
+    }),
+    getWBOrdersStatus: builder.mutation<any, { orders: string[] }>({
+      query: (body) => ({
+        url: "/wildberries/orders/status",
+        method: "POST",
+        body,
+      }),
+    }),
     getOzonOrders: builder.query<any, void>({
       query: () => {
         return {
@@ -48,11 +63,43 @@ export const wbOrderApi = createApi({
         };
       },
     }),
+    getWBOrderMetadata: builder.mutation<any, { orderId: number }>({
+      query: ({ orderId }) => ({
+        url: `/wildberries/orders/metadata`,
+        method: "POST", // или GET если API GET
+        params: { orderId },
+      }),
+    }),
+    getWBSupplies: builder.query({
+      query: ({ next = 4, limit = 100 }: any) => ({
+        url: `/wildberries/supplies`,
+        params: { next, limit },
+      }),
+    }),
+    createWBSupply: builder.mutation<any, { name: string }>({
+      query: ({ name }) => ({
+        url: "/wildberries/supplies",
+        method: "POST",
+        body: { name },
+      }),
+    }),
+    deleteWBSupply: builder.mutation<any, { id: string }>({
+      query: ({ id }) => ({
+        url: `/wildberries/supplies/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
 export const {
   useGetWBOrdersQuery,
+  useGetWBOrdersNewQuery,
   useGetOzonOrdersQuery,
+  useGetWBOrdersStatusMutation,
   useGetOzonPostQuery,
+  useGetWBOrderMetadataMutation,
+  useGetWBSuppliesQuery,
+  useCreateWBSupplyMutation,
+  useDeleteWBSupplyMutation,
 } = wbOrderApi;

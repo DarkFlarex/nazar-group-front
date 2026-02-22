@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Form,
   Input,
@@ -29,31 +29,32 @@ const MarketplaceForm = () => {
   const [cardResponse, setCardResponse] = useState<any>(null);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [formData, setFormData] = useState<any>({});
+  const [charValues, setCharValues] = useState<Record<number, any>>({});
 
-  // 📦 Загружаем все справочники один раз
-  const { data: categories = [], refetch: refetchCategory } =
-    useGetCategoriesQuery();
-  const { data: subjects = [], refetch: refetchsubjects } = useGetSubjectsQuery(
-    { parentID: formData.category }
-  );
-  const { data: colors = [], refetch: refetchcolors } = useGetColorsQuery();
-  const { data: countries = [], refetch: refetchcountries } =
-    useGetCountriesQuery();
-
-  // состояния для каскада
-  const [filteredSubjects, setFilteredSubjects] = useState<any>();
-
-  const { data: chars = [] } = useGetCharsQuery(filteredSubjects, {
-    skip: !filteredSubjects,
+  // Справочники
+  const { data: categories = [] } = useGetCategoriesQuery();
+  const { data: subjects = [] } = useGetSubjectsQuery({
+    parentID: formData.category,
   });
-  // Обновляем предметы при выборе категории
+  const { data: colors = [] } = useGetColorsQuery();
+  const { data: countries = [] } = useGetCountriesQuery();
+  const { data: chars = [] } = useGetCharsQuery(formData.subjectId, {
+    skip: !formData.subjectId,
+  });
+
   const handleCategoryChange = (value: any) => {
-    setFormData({ category: value });
+    setFormData({ category: value, subjectId: null });
+    setCharValues({});
+    form.setFieldsValue({ subjectId: undefined });
   };
 
-  // Обновляем характеристики при выборе предмета
-  const handleSubjectChange = (subjectId: number) => {
-    setFilteredSubjects(subjectId);
+  const handleSubjectChange = (value: any) => {
+    setFormData({ ...formData, subjectId: value });
+    setCharValues({});
+  };
+
+  const handleCharValueChange = (charId: number, value: any) => {
+    setCharValues((prev) => ({ ...prev, [charId]: value }));
   };
 
   const onUploadChange: UploadProps["onChange"] = ({
@@ -79,7 +80,6 @@ const MarketplaceForm = () => {
 
   const handleCreateCard = async () => {
     const values = form.getFieldsValue();
-
     if (!values.sku) {
       message.error("Введите SKU!");
       return;
@@ -89,37 +89,94 @@ const MarketplaceForm = () => {
     setCardResponse(null);
 
     try {
-      const images = fileList.map((f) => f.originFileObj);
+      // Формируем характеристики
+      const characteristics = Object.entries(charValues).map(([id, val]) => ({
+        id: Number(id),
+        value: Array.isArray(val) ? val : [val],
+      }));
 
+      // Размеры и вес
+      const dimensions = {
+        length: values.length || 0,
+        width: values.width || 0,
+        height: values.height || 0,
+        weightBrutto: values.weight || 0,
+      };
+
+      // Размеры WB
+      const sizes = [
+        {
+          techSize: values.techSize || "0",
+          wbSize: values.wbSize || "",
+          price: values.price || 0,
+          skus: [values.sku],
+        },
+      ];
+
+      // Payload для WB API
       const payload = [
         {
           subjectID: values.subjectId,
           variants: [
             {
-              vendorCode: `SANDBOX-CARD-${Date.now()}`,
-              title: "Тестовая карто3211чка",
-              brand: "SandboxBrand",
-              description: "Создано через локальный test сервер",
-              characteristics: [
-                { id: values.charId },
-                { id: values.colorId },
-                { id: values.countryId },
-              ],
-              dimensions: { length: 10, width: 10, height: 10 },
-              weight: 0.3,
-              sizes: [{ skus: [values.sku] }],
-              images,
+              vendorCode: values.vendorCode || `SANDBOX-${Date.now()}`,
+              title: values.title || "",
+              description: values.description || "",
+              brand: values.brand || "",
+              dimensions,
+              characteristics,
+              sizes,
+              images: fileList.map((f) => f.originFileObj),
+              wholesale: {
+                enabled: values.wholesaleEnabled || false,
+                quantum: values.wholesaleQuantum || 0,
+              },
             },
           ],
         },
       ];
 
       const res = await fetch(
-        "https://nazar-backend.333.kg/api/wb/content/cards/update",
+        "https://nazar-backend.333.kg/api/wb/content/cards/upload",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify([
+            {
+              subjectID: 2874,
+              variants: [
+                {
+                  vendorCode: "44444444444444444444",
+                  title: "44444444444444444444",
+                  description: "44444444444444444444",
+                  brand: "44444444444444444444",
+                  characteristics: [
+                    { id: 51, value: ["44444444444444444444"] },
+                    { id: 8606, value: ["44444444444444444444"] },
+                    { id: 10924, value: ["44444444444444444444"] },
+                    { id: 19717, value: ["1"] },
+                    // остальные характеристики
+                  ],
+                  dimensions: {
+                    length: 1,
+                    width: 1,
+                    height: 1,
+                    weightBrutto: 1,
+                  },
+                  sizes: [
+                    {
+                      techSize: "1",
+                      wbSize: "1",
+                      price: 1,
+                      skus: ["44444444444444444444"],
+                    },
+                  ],
+                  images: ["https://example.com/image1.jpg"],
+                  wholesale: { enabled: false, quantum: 0 },
+                },
+              ],
+            },
+          ]),
         }
       );
 
@@ -135,30 +192,6 @@ const MarketplaceForm = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const fetchDataSequentially = async () => {
-      await refetchCategory?.();
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      await refetchsubjects?.();
-      console.log("Subjects loaded");
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      await refetchcolors?.();
-      console.log("Colors loaded");
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      await refetchcountries?.();
-      console.log("Countries loaded");
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    };
-
-    fetchDataSequentially();
-  }, []);
 
   return (
     <Card
@@ -180,7 +213,7 @@ const MarketplaceForm = () => {
           onChange={onUploadChange}
           onPreview={onUploadPreview}
         >
-          {fileList.length < 5 && "+ Upload"}
+          {fileList.length < 10 && "+ Upload"}
         </Upload>
       </ImgCrop>
 
@@ -190,6 +223,22 @@ const MarketplaceForm = () => {
           label="SKU товара"
           rules={[{ required: true, message: "Введите SKU" }]}
         >
+          <Input />
+        </Form.Item>
+
+        <Form.Item name="vendorCode" label="Артикул продавца">
+          <Input />
+        </Form.Item>
+
+        <Form.Item name="title" label="Название">
+          <Input />
+        </Form.Item>
+
+        <Form.Item name="description" label="Описание">
+          <Input.TextArea rows={3} />
+        </Form.Item>
+
+        <Form.Item name="brand" label="Бренд">
           <Input />
         </Form.Item>
 
@@ -224,45 +273,60 @@ const MarketplaceForm = () => {
           </Select>
         </Form.Item>
 
-        <Form.Item name="charId" label="Характеристика">
-          <Select placeholder="Выберите характеристику">
-            {chars.map((c) => (
-              <Option key={c.id} value={c.id}>
-                {c.name}
-              </Option>
-            ))}
-          </Select>
+        {/* Динамические характеристики */}
+        {chars.map((char: any) => (
+          <Form.Item
+            key={char.charcID}
+            label={`${char.name}${char.required ? " *" : ""}`}
+            required={char.required}
+          >
+            <Input
+              value={charValues[char.charcID] || ""}
+              onChange={(e) =>
+                handleCharValueChange(char.charcID, e.target.value)
+              }
+              placeholder={`Введите значение для "${char.name}"`}
+            />
+          </Form.Item>
+        ))}
+
+        <Form.Item name="length" label="Длина">
+          <Input type="number" />
+        </Form.Item>
+        <Form.Item name="width" label="Ширина">
+          <Input type="number" />
+        </Form.Item>
+        <Form.Item name="height" label="Высота">
+          <Input type="number" />
+        </Form.Item>
+        <Form.Item name="weight" label="Вес">
+          <Input type="number" />
         </Form.Item>
 
-        <Form.Item name="colorId" label="Цвет">
-          <Select placeholder="Выберите цвет">
-            {colors.map((c) => (
-              <Option key={c.id} value={c.id}>
-                {c.name}
-              </Option>
-            ))}
-          </Select>
+        <Form.Item name="techSize" label="Технический размер">
+          <Input />
+        </Form.Item>
+        <Form.Item name="wbSize" label="Размер WB">
+          <Input />
+        </Form.Item>
+        <Form.Item name="price" label="Цена">
+          <Input type="number" />
         </Form.Item>
 
-        <Form.Item
-          name="countryId"
-          label="Страна"
-          rules={[{ required: true, message: "Выберите страну" }]}
-        >
-          <Select placeholder="Выберите страну">
-            {countries.map((c) => (
-              <Option key={c.id} value={c.id}>
-                {c.name}
-              </Option>
-            ))}
+        <Form.Item name="wholesaleEnabled" label="Оптовая продажа">
+          <Select>
+            <Option value={true}>Да</Option>
+            <Option value={false}>Нет</Option>
           </Select>
+        </Form.Item>
+        <Form.Item name="wholesaleQuantum" label="Количество для опта">
+          <Input type="number" />
         </Form.Item>
 
         <Button
           type="primary"
           block
           loading={loading}
-          style={{ borderRadius: 6 }}
           onClick={handleCreateCard}
         >
           Создать карточку WB
@@ -286,3 +350,4 @@ const MarketplaceForm = () => {
 };
 
 export default MarketplaceForm;
+//9999999999999999

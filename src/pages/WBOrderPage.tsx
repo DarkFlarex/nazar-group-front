@@ -10,17 +10,33 @@ import {
   Row,
   Col,
   Radio,
+  Tag,
+  Alert,
 } from "antd";
 import moment from "moment";
-import { useGetWBOrdersQuery } from "../store/api/wbOrdersApi";
+import {
+  useGetWBOrderMetadataMutation,
+  useGetWBOrdersNewQuery,
+  useGetWBOrdersQuery,
+  useGetWBOrdersStatusMutation,
+} from "../store/api/wbOrdersApi";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 type ViewMode = "table" | "cards";
 type OrderStatus = "in_process" | "done" | "rejected";
+type OrdersTab = "all" | "new";
 
-const STATUS_LABELS: any = {
+interface Order {
+  id: number;
+  createdAt: string;
+  skus: string[];
+  finalPrice: number;
+  status?: OrderStatus;
+}
+
+const STATUS_LABELS: Record<OrderStatus, string> = {
   in_process: "В обработке",
   done: "Выполнено",
   rejected: "Отклонено",
@@ -31,25 +47,125 @@ const WbOrdersPage: React.FC = () => {
     moment().subtract(14, "days"),
     moment(),
   ]);
+
+  const [ordersTab, setOrdersTab] = useState<OrdersTab>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [statusFilter, setStatusFilter] = useState<OrderStatus>("in_process");
 
-  const { data, isLoading, isError, refetch } = useGetWBOrdersQuery();
+  const [statusesMap, setStatusesMap] = useState<Record<number, OrderStatus>>(
+    {}
+  );
 
-  /** 👉 добавляем статус по умолчанию */
-  const orders = useMemo(() => {
-    return (
-      data?.data.orders.map((order: any) => ({
-        ...order,
-        status: order.status ?? "in_process",
-      })) || []
+  const [getStatuses, { isLoading: isStatusLoading }] =
+    useGetWBOrdersStatusMutation();
+  const [getOrderMetadata, { isLoading: isMetadataLoading }] =
+    useGetWBOrderMetadataMutation();
+  const { data = [], isLoading, isError, refetch } = useGetWBOrdersQuery();
+  const handleGetMetadata = async (orderId: number) => {
+    try {
+      const metadata = await getOrderMetadata({ orderId }).unwrap();
+      alert(`Метаданные заказа ${orderId}: ` + JSON.stringify(metadata));
+      // Можно показать через модалку, либо сохранить в state для отображения
+    } catch (error) {
+      console.error("Ошибка при получении метаданных", error);
+    }
+  };
+  const {
+    data: newOrders = [],
+    isLoading: isLoadingNew,
+    isError: isErrorNew,
+    refetch: refetchNew,
+  } = useGetWBOrdersNewQuery();
+
+  /* =========================
+     МАППИНГ СТАТУСОВ
+  ========================== */
+  const mapOrderStatus = (
+    supplierStatus: string,
+    wbStatus: string
+  ): OrderStatus => {
+    if (wbStatus === "declined_by_client") {
+      return "rejected";
+    }
+
+    if (supplierStatus === "complete") {
+      return "done";
+    }
+
+    return "in_process";
+  };
+
+  /* =========================
+     ПРОВЕРКА АКТУАЛЬНЫХ СТАТУСОВ
+  ========================== */
+  const handleCheckStatuses = async () => {
+    try {
+      const activeOrders = ordersTab === "all" ? data : newOrders;
+
+      const orderIds = activeOrders.map((o: any) => o.id);
+
+      const response = await getStatuses({
+        orders: orderIds,
+      }).unwrap();
+
+      const newStatuses: Record<number, OrderStatus> = {};
+
+      response.forEach((item: any) => {
+        newStatuses[item.id] = mapOrderStatus(
+          item.supplierStatus,
+          item.wbStatus
+        );
+      });
+
+      setStatusesMap((prev) => ({
+        ...prev,
+        ...newStatuses,
+      }));
+    } catch (error) {
+      console.error("Ошибка при получении статусов", error);
+    }
+  };
+
+  /* =========================
+     ОБРАБОТКА ЗАКАЗОВ
+  ========================== */
+  const preparedOrders = useMemo(() => {
+    const source = ordersTab === "all" ? data : newOrders;
+
+    return source.map((order: Order) => ({
+      ...order,
+      status: statusesMap[order.id] ?? order.status ?? "in_process",
+    }));
+  }, [data, newOrders, ordersTab, statusesMap]);
+
+  /* =========================
+     ФИЛЬТР ПО ДАТЕ
+  ========================== */
+  const dateFilteredOrders = useMemo(() => {
+    if (!dateRange) return preparedOrders;
+
+    const [start, end] = dateRange;
+
+    return preparedOrders.filter((order: any) =>
+      moment(order.createdAt).isBetween(
+        start.startOf("day"),
+        end.endOf("day"),
+        undefined,
+        "[]"
+      )
     );
-  }, [data]);
+  }, [preparedOrders, dateRange]);
 
-  const filteredOrders = orders.filter(
+  /* =========================
+     ФИЛЬТР ПО СТАТУСУ
+  ========================== */
+  const filteredOrders = dateFilteredOrders.filter(
     (order: any) => order.status === statusFilter
   );
 
+  /* =========================
+     КОЛОНКИ
+  ========================== */
   const columns = [
     {
       title: "ID заказа",
@@ -83,32 +199,72 @@ const WbOrdersPage: React.FC = () => {
       title: "Статус",
       dataIndex: "status",
       key: "status",
-      render: (status: OrderStatus) => STATUS_LABELS[status],
+      render: (status: OrderStatus) => {
+        const color =
+          status === "done"
+            ? "green"
+            : status === "rejected"
+            ? "red"
+            : "orange";
+
+        return <Tag color={color}>{STATUS_LABELS[status]}</Tag>;
+      },
+    },
+    {
+      title: "Метаданные",
+      key: "metadata",
+      render: (_: any, order: Order) => (
+        <Button
+          size="small"
+          loading={isMetadataLoading}
+          onClick={() => handleGetMetadata(order.id)}
+        >
+          Получить
+        </Button>
+      ),
     },
   ];
 
-  if (isLoading) {
-    return <Spin tip="Загрузка заказов Wildberries..." />;
+  if (isLoading || isLoadingNew) {
+    return <Spin tip="Загрузка заказов..." />;
   }
 
-  if (isError) {
+  if (isError || isErrorNew) {
     return <Text type="danger">Ошибка при загрузке заказов</Text>;
   }
 
   return (
     <div style={{ padding: 20 }}>
-      <Title level={3}>Заказы Wildberries</Title>
+      <Title level={3}>
+        Заказы Wildberries{" "}
+        <Button loading={isStatusLoading} onClick={handleCheckStatuses}>
+          Проверить статусы
+        </Button>
+      </Title>
+
+      {/* Верхние табы */}
+      <Tabs
+        activeKey={ordersTab}
+        onChange={(key) => setOrdersTab(key as OrdersTab)}
+        style={{ marginBottom: 24 }}
+        items={[
+          { label: "Все заказы", key: "all" },
+          { label: "Новые заказы", key: "new" },
+        ]}
+      />
 
       {/* Панель управления */}
       <Row gutter={16} style={{ marginBottom: 16 }}>
         <Col>
           <RangePicker
-            value={dateRange as any}
-            onChange={setDateRange as any}
+            value={dateRange}
+            onChange={(dates) => setDateRange(dates as any)}
           />
         </Col>
         <Col>
-          <Button onClick={refetch}>Обновить</Button>
+          <Button onClick={ordersTab === "all" ? refetch : refetchNew}>
+            Обновить
+          </Button>
         </Col>
         <Col>
           <Radio.Group
@@ -126,18 +282,22 @@ const WbOrdersPage: React.FC = () => {
         activeKey={statusFilter}
         onChange={(key) => setStatusFilter(key as OrderStatus)}
         style={{ marginBottom: 16 }}
-      >
-        <Tabs.TabPane tab="В обработке" key="in_process" />
-        <Tabs.TabPane tab="Выполнено" key="done" />
-        <Tabs.TabPane tab="Отклонено" key="rejected" />
-      </Tabs>
+        items={[
+          {
+            label: "В обработке",
+            key: "in_process",
+          },
+          { label: "Выполнено", key: "done" },
+          { label: "Отклонено", key: "rejected" },
+        ]}
+      />
 
       {/* Отображение */}
       {viewMode === "table" ? (
         <Table
           columns={columns}
           dataSource={filteredOrders}
-          rowKey={(record: any) => record.id}
+          rowKey="id"
           pagination={{ pageSize: 100 }}
         />
       ) : (
@@ -152,7 +312,8 @@ const WbOrdersPage: React.FC = () => {
                 <br />
                 <Text strong>Сумма:</Text> {order.finalPrice} ₽
                 <br />
-                <Text strong>Статус:</Text> {STATUS_LABELS[order.status]}
+                <Text strong>Статус:</Text>{" "}
+                <Tag>{STATUS_LABELS[order.status as OrderStatus]}</Tag>
               </Card>
             </Col>
           ))}
