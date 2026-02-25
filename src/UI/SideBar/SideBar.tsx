@@ -42,6 +42,7 @@ const menuItems = [
     label: "Накладные",
     children: [
       { key: "/invoices/prihod", label: "Приход" },
+      { key: "/invoices/see/income", label: "Список прихода" },
       { key: "/invoices/rashod", label: "Расход" },
       { key: "/invoices/customerOrdersPage", label: "Заказы клиентов" },
     ],

@@ -12,7 +12,10 @@ import {
   Radio,
   Tabs,
 } from "antd";
-import { useGetProductListMutation } from "../store/api/ozonCategoryApi";
+import {
+  useGetProductInfoStokMutation,
+  useGetProductListMutation,
+} from "../store/api/ozonCategoryApi";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -20,6 +23,8 @@ const { TabPane } = Tabs;
 const OzonProductList = () => {
   const [form] = Form.useForm();
   const [getProductList, { isLoading }] = useGetProductListMutation();
+  const [getProductQuant, { isLoading: isLoadingQuant }] =
+    useGetProductInfoStokMutation();
   const [products, setProducts] = useState<any[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
@@ -38,7 +43,34 @@ const OzonProductList = () => {
 
     try {
       const res = await getProductList(payload).unwrap();
-      setProducts(res.result.items || []);
+      // Получаем данные о количестве
+      const quantRes = await getProductQuant({
+        filter: {},
+        limit: 100, // Возможно, тут нужно будет настроить лимит или фильтр для получения нужных остатков
+      }).unwrap();
+
+      const productsWithQuant = res.result.items.map((product: any) => {
+        const foundQuant = quantRes.items.find(
+          (q: any) => q.product_id === product.product_id
+        );
+        // Суммируем 'present' из всех 'stocks' для FBO и FBS
+        const fboPresent =
+          foundQuant?.stocks
+            .filter((s: any) => s.type === "fbo")
+            .reduce((sum: number, s: any) => sum + s.present, 0) || 0;
+        const fbsPresent =
+          foundQuant?.stocks
+            .filter((s: any) => s.type === "fbs")
+            .reduce((sum: number, s: any) => sum + s.present, 0) || 0;
+
+        return {
+          ...product,
+          fbo_present_stock: fboPresent,
+          fbs_present_stock: fbsPresent,
+        };
+      });
+
+      setProducts(productsWithQuant || []);
       setTotal(res.result.total || 0);
     } catch (e) {
       console.error(e);
@@ -56,15 +88,13 @@ const OzonProductList = () => {
     },
     {
       title: "FBO",
-      dataIndex: "has_fbo_stocks",
-      key: "has_fbo_stocks",
-      render: (v: boolean) => (v ? "Да" : "Нет"),
+      dataIndex: "fbo_present_stock", // Используем новое поле
+      key: "fbo_present_stock",
     },
     {
       title: "FBS",
-      dataIndex: "has_fbs_stocks",
-      key: "has_fbs_stocks",
-      render: (v: boolean) => (v ? "Да" : "Нет"),
+      dataIndex: "fbs_present_stock", // Используем новое поле
+      key: "fbs_present_stock",
     },
     {
       title: "Скидка",
@@ -83,10 +113,8 @@ const OzonProductList = () => {
   return (
     <Card
       style={{
-        margin: "20px auto",
         borderRadius: 10,
         boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-        padding: 20,
       }}
     >
       <Title level={4} style={{ textAlign: "center", marginBottom: 20 }}>
@@ -118,7 +146,7 @@ const OzonProductList = () => {
         </Form.Item>
       </Form>
 
-      <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+      <Row justify="space-between" align="middle" style={{ marginBottom: 0 }}>
         <Col>
           <Tabs
             activeKey={tabKey as any}
@@ -141,14 +169,14 @@ const OzonProductList = () => {
         </Col>
       </Row>
 
-      {isLoading ? (
+      {isLoading || isLoadingQuant ? ( // Учитываем загрузку остатков
         <Spin tip="Загрузка товаров..." />
       ) : viewMode === "table" ? (
         <Table
           columns={columns}
           dataSource={filteredProducts}
           rowKey="product_id"
-          scroll={{ x: 1300, y: 700 }}
+          scroll={{ x: 1300, y: 470 }}
         />
       ) : (
         <div
@@ -168,11 +196,11 @@ const OzonProductList = () => {
                   <Text strong>Архивирован: </Text>
                   <Text>{p.archived ? "Да" : "Нет"}</Text>
                   <br />
-                  <Text strong>FBO: </Text>
-                  <Text>{p.has_fbo_stocks ? "Да" : "Нет"}</Text>
+                  <Text strong>FBO (в наличии): </Text>
+                  <Text>{p.fbo_present_stock}</Text> {/* Отображаем FBO */}
                   <br />
-                  <Text strong>FBS: </Text>
-                  <Text>{p.has_fbs_stocks ? "Да" : "Нет"}</Text>
+                  <Text strong>FBS (в наличии): </Text>
+                  <Text>{p.fbs_present_stock}</Text> {/* Отображаем FBS */}
                   <br />
                   <Text strong>Скидка: </Text>
                   <Text>{p.is_discounted ? "Да" : "Нет"}</Text>

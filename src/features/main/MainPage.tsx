@@ -28,6 +28,7 @@ import SupplyTable from "../../pages/SupplyTable";
 import PostingsTable from "../../pages/PostingsTable";
 import StocksQoanPage from "../../pages/OzonStockQuan";
 import WbOrdersPage from "../../pages/WBOrderPage";
+import InvoiceIncomeTable from "../../pages/InvoiceIncomeTable";
 
 const { Content } = Layout;
 
@@ -39,10 +40,15 @@ const MainPage = () => {
           <SideBar />
 
           <Layout>
-            <Content style={{ padding: 5 }}>
+            <Content style={{}}>
               <Routes>
                 <Route path="/invoices/prihod" element={<PrihodPage />} />
                 <Route path="/invoices/rashod" element={<ExpensePage />} />
+                <Route
+                  path="/invoices/see/income"
+                  element={<InvoiceIncomeTable />}
+                />
+
                 <Route path="/market/wildberis" element={<MarketplaceForm />} />
                 <Route path="/market/cardsmerket" element={<CardsListWB />} />
                 <Route path="/market/ozonCards" element={<CardsPageOZ />} />

@@ -100,6 +100,14 @@ export const ozonCategoryApi = ozonBaseApi.injectEndpoints({
         body,
       }),
     }),
+
+    getProductInfoStok: builder.mutation<any, any>({
+      query: (body) => ({
+        url: "/v4/product/info/stocks",
+        method: "POST",
+        body,
+      }),
+    }),
     getProductList: builder.mutation<
       any,
       { filter?: any; last_id?: string; limit?: number }
@@ -121,4 +129,5 @@ export const {
   useCreateOrUpdateProductMutation,
   useGetProductImportInfoMutation,
   useGetProductListMutation,
+  useGetProductInfoStokMutation,
 } = ozonCategoryApi;

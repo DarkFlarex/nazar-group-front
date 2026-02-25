@@ -27,10 +27,11 @@ export const wbOrderApi = createApi({
     baseUrl: "https://nazar-backend.333.kg/api", // ← подставь нужный домен
   }),
   endpoints: (builder) => ({
-    getWBOrders: builder.query<any, void>({
-      query: () => {
+    getWBOrders: builder.query<any, any>({
+      query: (data) => {
         return {
           url: "/wb/orders",
+          params: data,
         };
       },
     }),

@@ -141,42 +141,7 @@ const MarketplaceForm = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify([
-            {
-              subjectID: 2874,
-              variants: [
-                {
-                  vendorCode: "44444444444444444444",
-                  title: "44444444444444444444",
-                  description: "44444444444444444444",
-                  brand: "44444444444444444444",
-                  characteristics: [
-                    { id: 51, value: ["44444444444444444444"] },
-                    { id: 8606, value: ["44444444444444444444"] },
-                    { id: 10924, value: ["44444444444444444444"] },
-                    { id: 19717, value: ["1"] },
-                    // остальные характеристики
-                  ],
-                  dimensions: {
-                    length: 1,
-                    width: 1,
-                    height: 1,
-                    weightBrutto: 1,
-                  },
-                  sizes: [
-                    {
-                      techSize: "1",
-                      wbSize: "1",
-                      price: 1,
-                      skus: ["44444444444444444444"],
-                    },
-                  ],
-                  images: ["https://example.com/image1.jpg"],
-                  wholesale: { enabled: false, quantum: 0 },
-                },
-              ],
-            },
-          ]),
+          body: JSON.stringify(payload),
         }
       );
 

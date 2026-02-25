@@ -15,6 +15,7 @@ import { DeleteOutlined } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import { useReactToPrint } from "react-to-print";
 import { useGetgoodsQuery } from "../../store/api/goodsApi";
+import { useGoodsIncomeMutation } from "../../store/api/invoiceApi";
 
 /* ================= TYPES ================= */
 
@@ -30,7 +31,7 @@ interface Product {
 
 interface HeaderValues {
   docNumber: string;
-  docDate: string;
+  docDate: any;
   supplier: string;
   warehouse: string;
 }
@@ -49,9 +50,9 @@ interface GoodsItem {
 
 const PrihodPage: React.FC = () => {
   const { data: products = [] } = useGetgoodsQuery();
-  const printRef = useRef<HTMLDivElement>(null);
+  const printRef = useRef<any>(null);
   const [form] = Form.useForm();
-
+  const [goodsIncome, { isLoading }] = useGoodsIncomeMutation();
   const [header, setHeader] = useState<HeaderValues | null>(null);
   const [items, setItems] = useState<GoodsItem[]>([]);
 
@@ -95,8 +96,7 @@ const PrihodPage: React.FC = () => {
 
         const updated = { ...row, [field]: value };
 
-        const sum =
-          (updated.quantity || 0) * (updated.price || 0);
+        const sum = (updated.quantity || 0) * (updated.price || 0);
 
         const discountSum = sum * ((updated.discount || 0) / 100);
 
@@ -122,16 +122,8 @@ const PrihodPage: React.FC = () => {
           showSearch
           placeholder="Выберите товар"
           value={record.productGuid}
-          optionFilterProp="label"
-          filterOption={(input, option) =>
-            (option?.label as string)
-              ?.toLowerCase()
-              .includes(input.toLowerCase())
-          }
           onChange={(val) => {
-            const product = products.find(
-              (p: Product) => p.guid === val
-            );
+            const product = products.find((p: Product) => p.guid === val);
 
             updateRow(record.key, "productGuid", val);
             updateRow(record.key, "productName", product?.nameid);
@@ -149,9 +141,7 @@ const PrihodPage: React.FC = () => {
         <InputNumber
           min={1}
           value={record.quantity}
-          onChange={(val) =>
-            updateRow(record.key, "quantity", val || 0)
-          }
+          onChange={(val) => updateRow(record.key, "quantity", val || 0)}
         />
       ),
     },
@@ -161,9 +151,7 @@ const PrihodPage: React.FC = () => {
         <InputNumber
           min={0}
           value={record.price}
-          onChange={(val) =>
-            updateRow(record.key, "price", val || 0)
-          }
+          onChange={(val) => updateRow(record.key, "price", val || 0)}
         />
       ),
     },
@@ -174,9 +162,7 @@ const PrihodPage: React.FC = () => {
           min={0}
           max={100}
           value={record.discount}
-          onChange={(val) =>
-            updateRow(record.key, "discount", val || 0)
-          }
+          onChange={(val) => updateRow(record.key, "discount", val || 0)}
         />
       ),
     },
@@ -198,16 +184,43 @@ const PrihodPage: React.FC = () => {
 
   /* ================= SAVE ================= */
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!header || items.length === 0) {
       message.error("Заполните шапку и товары");
       return;
     }
 
-    console.log("HEADER:", header);
-    console.log("ITEMS:", items);
+    const payload = {
+      doc_number: header.docNumber,
+      doc_date: header.docDate
+        ? header.docDate instanceof Date
+          ? header.docDate
+          : new Date(header.docDate) // <-- приводим к JS Date
+        : undefined,
+      supplier: header.supplier,
+      warehouse: header.warehouse,
+      goods: items.map((item) => ({
+        product_guid: item.productGuid,
+        quantity: item.quantity,
+        price: item.price,
+        discount: item.discount,
+        total: item.total,
+      })),
+      total_sum: totalSum,
+    };
 
-    message.success("Документ проведён");
+    try {
+      await goodsIncome(payload).unwrap();
+
+      message.success("Документ успешно проведён");
+
+      form.resetFields();
+      setItems([]);
+      setHeader(null);
+    } catch (error) {
+      console.error(error);
+      message.error("Ошибка при сохранении документа");
+    }
   };
 
   const totalSum = items.reduce((acc, x) => acc + x.total, 0);
@@ -266,9 +279,7 @@ const PrihodPage: React.FC = () => {
 
       <Divider />
 
-      <div style={{ fontWeight: 600 }}>
-        Итого: {totalSum.toFixed(2)}
-      </div>
+      <div style={{ fontWeight: 600 }}>Итого: {totalSum.toFixed(2)}</div>
 
       <Space style={{ marginTop: 16 }}>
         <Button type="primary" onClick={handleSave}>

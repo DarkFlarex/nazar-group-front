@@ -14,6 +14,7 @@ import {
   Alert,
 } from "antd";
 import moment from "moment";
+import dayjs from "dayjs";
 import {
   useGetWBOrderMetadataMutation,
   useGetWBOrdersNewQuery,
@@ -43,9 +44,9 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
 };
 
 const WbOrdersPage: React.FC = () => {
-  const [dateRange, setDateRange] = useState<any>([
-    moment().subtract(14, "days"),
-    moment(),
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
+    dayjs().subtract(14, "day"),
+    dayjs(),
   ]);
 
   const [ordersTab, setOrdersTab] = useState<OrdersTab>("all");
@@ -55,12 +56,25 @@ const WbOrdersPage: React.FC = () => {
   const [statusesMap, setStatusesMap] = useState<Record<number, OrderStatus>>(
     {}
   );
+  const ordersQueryParams = useMemo(() => {
+    const [start, end] = dateRange;
 
+    return {
+      startDate: start.startOf("day").toISOString(),
+      endDate: end.endOf("day").toISOString(),
+      limit: 100,
+    };
+  }, [dateRange]);
   const [getStatuses, { isLoading: isStatusLoading }] =
     useGetWBOrdersStatusMutation();
   const [getOrderMetadata, { isLoading: isMetadataLoading }] =
     useGetWBOrderMetadataMutation();
-  const { data = [], isLoading, isError, refetch } = useGetWBOrdersQuery();
+  const {
+    data = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useGetWBOrdersQuery(ordersQueryParams);
   const handleGetMetadata = async (orderId: number) => {
     try {
       const metadata = await getOrderMetadata({ orderId }).unwrap();
@@ -142,18 +156,18 @@ const WbOrdersPage: React.FC = () => {
      ФИЛЬТР ПО ДАТЕ
   ========================== */
   const dateFilteredOrders = useMemo(() => {
-    if (!dateRange) return preparedOrders;
-
     const [start, end] = dateRange;
 
-    return preparedOrders.filter((order: any) =>
-      moment(order.createdAt).isBetween(
-        start.startOf("day"),
-        end.endOf("day"),
-        undefined,
-        "[]"
-      )
-    );
+    return preparedOrders.filter((order: any) => {
+      const orderDate = dayjs(order.createdAt);
+
+      return (
+        (orderDate.isAfter(start.startOf("day")) &&
+          orderDate.isBefore(end.endOf("day"))) ||
+        orderDate.isSame(start.startOf("day")) ||
+        orderDate.isSame(end.endOf("day"))
+      );
+    });
   }, [preparedOrders, dateRange]);
 
   /* =========================

@@ -1,22 +1,54 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, Row, Col, Typography, Spin, Radio, Tabs, Input } from "antd";
 import { useGetCardsQuery } from "../store/api/cardsApi";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
+interface StockData {
+  [sku: string]: number;
+}
+
 const CardsListWB = () => {
   const [cards, setCards] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [search, setSearch] = useState("");
   const [tabKey, setTabKey] = useState<"all" | "brand">("all");
+  const [stocks, setStocks] = useState<StockData>({});
+  const [loadingStock, setLoadingStock] = useState(true);
 
   const { data, isLoading, error } = useGetCardsQuery(undefined, {
     refetchOnMountOrArgChange: false,
   });
 
+  // Сохраняем карточки при загрузке
   useEffect(() => {
-    if (data) setCards(data);
+    if (data) {
+      setCards(data);
+
+      // Собираем все SKU для запроса остатков
+      const allSKUs = data.flatMap(
+        (card: any) => card.sizes?.flatMap((s: any) => s.skus) || []
+      );
+
+      if (allSKUs.length > 0) {
+        setLoadingStock(true);
+        fetch(
+          `https://nazar-backend.333.kg/api/wb/stocks?sku=${allSKUs.join(",")}`
+        )
+          .then((res) => res.json())
+          .then((stockData) => {
+            // stockData предполагаем в формате [{sku: '123', amount: 10}, ...]
+            const stockMap: StockData = {};
+            stockData.forEach((item: any) => {
+              stockMap[item.sku] = item.amount ?? 0;
+            });
+            setStocks(stockMap);
+          })
+          .catch((err) => console.error("Ошибка получения остатков:", err))
+          .finally(() => setLoadingStock(false));
+      }
+    }
   }, [data]);
 
   const filteredCards = cards.filter((card) => {
@@ -85,6 +117,20 @@ const CardsListWB = () => {
                 <Text strong>ID товара: </Text>
                 <Text>{card.nmID}</Text>
                 <br />
+                <Text strong>Остатки по SKU: </Text>
+                {loadingStock ? (
+                  <Spin size="small" />
+                ) : (
+                  <ul style={{ margin: 0, paddingLeft: 20 }}>
+                    {card.sizes
+                      ?.flatMap((s: any) => s.skus)
+                      .map((sku: string) => (
+                        <li key={sku}>
+                          {sku}: {stocks[sku] ?? "-"}
+                        </li>
+                      )) ?? "-"}
+                  </ul>
+                )}
                 <Text strong>Размеры: </Text>
                 <Text>{`Д: ${card.dimensions.length || 0}, Ш: ${
                   card.dimensions.width || 0
@@ -99,19 +145,6 @@ const CardsListWB = () => {
                 <br />
                 <Text strong>Описание: </Text>
                 <Text>{card.description || "-"}</Text>
-                <br />
-                <Text strong>Характеристики:</Text>
-                <ul>
-                  {card.characteristics.map((ch: any) => (
-                    <li key={ch.id}>
-                      {ch.name}: {ch?.value}
-                    </li>
-                  ))}
-                </ul>
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                  Создано: {new Date(card.createdAt).toLocaleDateString()} |
-                  Обновлено: {new Date(card.updatedAt).toLocaleDateString()}
-                </Text>
               </Card>
             </Col>
           ))}
@@ -126,6 +159,7 @@ const CardsListWB = () => {
               <th>ID товара</th>
               <th>Размеры</th>
               <th>SKU</th>
+              <th>Остаток</th>
             </tr>
           </thead>
           <tbody>
@@ -138,6 +172,21 @@ const CardsListWB = () => {
                 <td>{`Д: ${card.dimensions.length}, Ш: ${card.dimensions.width}, В: ${card.dimensions.height}, Вес: ${card.dimensions.weightBrutto}`}</td>
                 <td>
                   {card.sizes.map((s: any) => s.skus.join(", ")).join("; ")}
+                </td>
+                <td>
+                  {loadingStock ? (
+                    <Spin size="small" />
+                  ) : (
+                    <ul style={{ margin: 0, paddingLeft: 20 }}>
+                      {card.sizes
+                        ?.flatMap((s: any) => s.skus)
+                        .map((sku: string) => (
+                          <li key={sku}>
+                            {sku}: {stocks[sku] ?? "-"}
+                          </li>
+                        )) ?? "-"}
+                    </ul>
+                  )}
                 </td>
               </tr>
             ))}
