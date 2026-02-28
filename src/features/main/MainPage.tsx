@@ -29,6 +29,7 @@ import PostingsTable from "../../pages/PostingsTable";
 import StocksQoanPage from "../../pages/OzonStockQuan";
 import WbOrdersPage from "../../pages/WBOrderPage";
 import InvoiceIncomeTable from "../../pages/InvoiceIncomeTable";
+import ProductAttributesEditor from "../../pages/ProductAttributesEditor";
 
 const { Content } = Layout;
 
@@ -100,7 +101,10 @@ const MainPage = () => {
                   path="/supply/PostingsOzon"
                   element={<PostingsTable />}
                 />
-
+                <Route
+                  path="/product/:type/:value"
+                  element={<ProductAttributesEditor />}
+                />
                 <Route
                   path="*"
                   element={<Navigate to="/invoices/customerOrdersPage" />}

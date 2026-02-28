@@ -108,6 +108,31 @@ export const ozonCategoryApi = ozonBaseApi.injectEndpoints({
         body,
       }),
     }),
+
+    getProductInfoStoks: builder.mutation<any, any>({
+      query: (body) => ({
+        url: "/v1/product/info/warehouse/stocks",
+        method: "POST",
+        body: {
+          cursor: "",
+          limit: 1000,
+          warehouse_id: 1020000882941000,
+        },
+      }),
+    }),
+    getProductInfoWare: builder.mutation<any, any>({
+      query: (body) => ({
+        url: "/v2/product/info/stocks-by-warehouse/fbs",
+        method: "POST",
+        body: {
+          cursor: "",
+          offer_id: [
+            749971546, 750795175, 752089448, 754387638, 754577765, 754628234,
+          ],
+          limit: 1000,
+        },
+      }),
+    }),
     getProductList: builder.mutation<
       any,
       { filter?: any; last_id?: string; limit?: number }
@@ -130,4 +155,6 @@ export const {
   useGetProductImportInfoMutation,
   useGetProductListMutation,
   useGetProductInfoStokMutation,
+  useGetProductInfoWareMutation,
+  useGetProductInfoStoksMutation,
 } = ozonCategoryApi;

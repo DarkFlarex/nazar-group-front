@@ -11,20 +11,34 @@ import {
   Col,
   Radio,
   Tabs,
+  Drawer,
 } from "antd";
 import {
   useGetProductInfoStokMutation,
+  useGetProductInfoStoksMutation,
+  useGetProductInfoWareMutation,
   useGetProductListMutation,
 } from "../store/api/ozonCategoryApi";
+import { useGetProductPricesMutation } from "../store/api/ozonProduct";
+import { useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
 
 const OzonProductList = () => {
   const [form] = Form.useForm();
+  const navigate = useNavigate();
   const [getProductList, { isLoading }] = useGetProductListMutation();
   const [getProductQuant, { isLoading: isLoadingQuant }] =
     useGetProductInfoStokMutation();
+  const [getProductStockQuant, { isLoading: isLoadingStockQuant }] =
+    useGetProductInfoStoksMutation();
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [priceData, setPriceData] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [getProductInfoWare] = useGetProductInfoWareMutation();
+  const [getProductPrice, { isLoading: isPriceLoading }] =
+    useGetProductPricesMutation();
   const [products, setProducts] = useState<any[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
@@ -46,14 +60,16 @@ const OzonProductList = () => {
       // Получаем данные о количестве
       const quantRes = await getProductQuant({
         filter: {},
-        limit: 100, // Возможно, тут нужно будет настроить лимит или фильтр для получения нужных остатков
+        limit: 1000, // Возможно, тут нужно будет настроить лимит или фильтр для получения нужных остатков
       }).unwrap();
+
+      const dataNew = getProductInfoWare({});
+      console.log(dataNew);
 
       const productsWithQuant = res.result.items.map((product: any) => {
         const foundQuant = quantRes.items.find(
           (q: any) => q.product_id === product.product_id
         );
-        // Суммируем 'present' из всех 'stocks' для FBO и FBS
         const fboPresent =
           foundQuant?.stocks
             .filter((s: any) => s.type === "fbo")
@@ -77,7 +93,27 @@ const OzonProductList = () => {
     }
   };
 
+  const showPrice = async (product: any) => {
+    setSelectedProduct(product);
+    try {
+      const res = await getProductPrice({
+        offer_id: product.offer_id,
+        product_id: product.product_id,
+      }).unwrap();
+      setPriceData(res);
+      setDrawerVisible(true);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const columns = [
+    {
+      title: "№",
+      key: "index",
+      render: (_: any, __: any, index: number) => index + 1,
+      width: 70,
+    },
     { title: "Offer ID", dataIndex: "offer_id", key: "offer_id" },
     { title: "Product ID", dataIndex: "product_id", key: "product_id" },
     {
@@ -101,6 +137,24 @@ const OzonProductList = () => {
       dataIndex: "is_discounted",
       key: "is_discounted",
       render: (v: boolean) => (v ? "Да" : "Нет"),
+    },
+    {
+      title: "Действие",
+      key: "action",
+      render: (_: any, record: any) => (
+        <>
+          <Button type="link" onClick={() => showPrice(record)}>
+            Цена
+          </Button>
+
+          <Button
+            type="link"
+            onClick={() => navigate(`/product/product_id/${record.product_id}`)}
+          >
+            Характеристики
+          </Button>
+        </>
+      ),
     },
   ];
 
@@ -176,6 +230,7 @@ const OzonProductList = () => {
           columns={columns}
           dataSource={filteredProducts}
           rowKey="product_id"
+          pagination={false} // ← ВАЖНО
           scroll={{ x: 1300, y: 470 }}
         />
       ) : (
@@ -216,6 +271,38 @@ const OzonProductList = () => {
           Всего товаров: {total}
         </div>
       )}
+
+      {/* Drawer для отображения цены */}
+      <Drawer
+        title={`Цены для Offer ID: ${selectedProduct?.offer_id}`}
+        placement="right"
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+      >
+        {isPriceLoading ? (
+          <Spin tip="Загрузка цены..." />
+        ) : priceData?.items?.length ? (
+          priceData.items.map((item: any) => (
+            <div key={item.product_id} style={{ marginBottom: 16 }}>
+              <Text strong>Цена: </Text>
+              <Text>
+                {item.price.price} {item.price.currency_code}
+              </Text>
+              <br />
+              <Text strong>Старая цена: </Text>
+              <Text>{item.price.old_price}</Text>
+              <br />
+              <Text strong>Минимальная цена: </Text>
+              <Text>{item.price.min_price}</Text>
+              <br />
+              <Text strong>VAT: </Text>
+              <Text>{item.price.vat * 100}%</Text>
+            </div>
+          ))
+        ) : (
+          <Text>Данных о цене нет</Text>
+        )}
+      </Drawer>
     </Card>
   );
 };
