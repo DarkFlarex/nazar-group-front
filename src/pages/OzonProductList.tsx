@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   Form,
@@ -163,6 +163,10 @@ const OzonProductList = () => {
     if (tabKey === "fbs") return p.has_fbs_stocks;
     return true;
   });
+
+  useEffect(() => {
+    fetchProducts({});
+  }, []);
 
   return (
     <Card

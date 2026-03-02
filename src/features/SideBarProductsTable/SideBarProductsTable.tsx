@@ -32,14 +32,14 @@ const columns = (
     render: (_value: unknown, record: Product) => (
       <>
         <Button type="link" onClick={() => onEdit(record)}>
-          Редактировать
+          Ред
         </Button>
         <Popconfirm
           title="Удалить товар?"
           onConfirm={() => onDelete(record.key)}
         >
           <Button type="link" danger>
-            Удалить
+            Уд.
           </Button>
         </Popconfirm>
       </>
@@ -92,12 +92,9 @@ const SideBarProductsTable = () => {
         dataSource={products}
         columns={columns(handleEdit, handleDelete)}
         rowKey="key"
-        pagination={{ pageSize: 15 }}
+        pagination={false}
         bordered
-        onRow={(record) => ({
-          onClick: () => onRowClick(record),
-          style: { cursor: "pointer" },
-        })}
+        size="small"
       />
 
       <SideBarProductsTableNewForm
