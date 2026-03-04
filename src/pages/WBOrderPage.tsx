@@ -203,12 +203,7 @@ const WbOrdersPage: React.FC = () => {
       key: "quantity",
       render: () => 1,
     },
-    {
-      title: "Сумма",
-      dataIndex: "finalPrice",
-      key: "finalPrice",
-      render: (value: number) => `${value} ₽`,
-    },
+
     {
       title: "Статус",
       dataIndex: "status",
@@ -221,7 +216,7 @@ const WbOrdersPage: React.FC = () => {
             ? "red"
             : "orange";
 
-        return <Tag color={color}>{STATUS_LABELS[status]}</Tag>;
+        return <Tag color={color}>{status}</Tag>;
       },
     },
     {
@@ -248,7 +243,7 @@ const WbOrdersPage: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 8 }}>
       <Title level={3}>
         Заказы Wildberries{" "}
         <Button loading={isStatusLoading} onClick={handleCheckStatuses}>
@@ -260,7 +255,6 @@ const WbOrdersPage: React.FC = () => {
       <Tabs
         activeKey={ordersTab}
         onChange={(key) => setOrdersTab(key as OrdersTab)}
-        style={{ marginBottom: 24 }}
         items={[
           { label: "Все заказы", key: "all" },
           { label: "Новые заказы", key: "new" },
@@ -268,7 +262,7 @@ const WbOrdersPage: React.FC = () => {
       />
 
       {/* Панель управления */}
-      <Row gutter={16} style={{ marginBottom: 16 }}>
+      <Row gutter={16}>
         <Col>
           <RangePicker
             value={dateRange}
@@ -312,6 +306,10 @@ const WbOrdersPage: React.FC = () => {
           columns={columns}
           dataSource={filteredOrders}
           rowKey="id"
+          scroll={{
+            y: "calc(100vh - 150px)",
+            x: "calc(100vw - 1350px)",
+          }}
           pagination={{ pageSize: 100 }}
         />
       ) : (

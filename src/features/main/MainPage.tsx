@@ -30,6 +30,8 @@ import StocksQoanPage from "../../pages/OzonStockQuan";
 import WbOrdersPage from "../../pages/WBOrderPage";
 import InvoiceIncomeTable from "../../pages/InvoiceIncomeTable";
 import ProductAttributesEditor from "../../pages/ProductAttributesEditor";
+import TaskStatusComponent from "../../pages/TaskStatusComponent";
+import RashodPage from "../../pages/rashod";
 
 const { Content } = Layout;
 
@@ -44,7 +46,7 @@ const MainPage = () => {
             <Content style={{}}>
               <Routes>
                 <Route path="/invoices/prihod" element={<PrihodPage />} />
-                <Route path="/invoices/rashod" element={<ExpensePage />} />
+                <Route path="/invoices/rashod" element={<RashodPage />} />
                 <Route
                   path="/invoices/see/income"
                   element={<InvoiceIncomeTable />}
@@ -89,6 +91,10 @@ const MainPage = () => {
                 <Route path="/orders/orderWb" element={<OrdersWBPage />} />
                 <Route path="/orders/OrderOzon" element={<OzonOrders />} />
                 <Route
+                  path="/orders/tasksOzon"
+                  element={<TaskStatusComponent />}
+                />
+                <Route
                   path="/orders/orderSuplier"
                   element={<SupplierOrdersPage />}
                 />
@@ -105,10 +111,7 @@ const MainPage = () => {
                   path="/product/:type/:value"
                   element={<ProductAttributesEditor />}
                 />
-                <Route
-                  path="*"
-                  element={<Navigate to="/invoices/customerOrdersPage" />}
-                />
+                <Route path="/invoices/rashodlist" element={<ExpensePage />} />
               </Routes>
             </Content>
           </Layout>
