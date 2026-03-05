@@ -1,10 +1,5 @@
 import { Layout, ConfigProvider } from "antd";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SideBar from "../../UI/SideBar/SideBar";
 import SideBarClientsTable from "../SideBarClientsTable/SideBarClientsTable";
 import SideBarProductsTable from "../SideBarProductsTable/SideBarProductsTable";
@@ -31,7 +26,7 @@ import WbOrdersPage from "../../pages/WBOrderPage";
 import InvoiceIncomeTable from "../../pages/InvoiceIncomeTable";
 import ProductAttributesEditor from "../../pages/ProductAttributesEditor";
 import TaskStatusComponent from "../../pages/TaskStatusComponent";
-import RashodPage from "../../pages/rashod";
+import RashodPage from "../../pages/Rashod";
 
 const { Content } = Layout;
 
@@ -43,7 +38,13 @@ const MainPage = () => {
           <SideBar />
 
           <Layout>
-            <Content style={{}}>
+            <Content
+              style={{
+                padding: "16px",
+                height: "100vh", // полностью занимает высоту окна
+                overflow: "auto", // включает вертикальный скролл
+              }}
+            >
               <Routes>
                 <Route path="/invoices/prihod" element={<PrihodPage />} />
                 <Route path="/invoices/rashod" element={<RashodPage />} />

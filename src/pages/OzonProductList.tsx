@@ -15,7 +15,6 @@ import {
 } from "antd";
 import {
   useGetProductInfoStokMutation,
-  useGetProductInfoStoksMutation,
   useGetProductInfoWareMutation,
   useGetProductListMutation,
 } from "../store/api/ozonCategoryApi";
@@ -31,8 +30,6 @@ const OzonProductList = () => {
   const [getProductList, { isLoading }] = useGetProductListMutation();
   const [getProductQuant, { isLoading: isLoadingQuant }] =
     useGetProductInfoStokMutation();
-  const [getProductStockQuant, { isLoading: isLoadingStockQuant }] =
-    useGetProductInfoStoksMutation();
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [priceData, setPriceData] = useState<any>(null);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);

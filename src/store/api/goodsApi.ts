@@ -14,10 +14,30 @@ export const goodsApi = createApi({
       query: () => "directory/good/list", // путь к API, который возвращает JSON с карточками
       providesTags: ["goods"],
     }),
-    updateGoodsFull: builder.mutation<any, any>({
+    updateGoods: builder.mutation<any, any>({
       query: (data: any) => {
         return {
-          url: "goods/update",
+          url: "good/update",
+          method: "POST",
+          body: data,
+        };
+      }, // путь к API, который возвращает JSON с карточками
+      invalidatesTags: ["goods"],
+    }),
+    updateStock: builder.mutation<any, any>({
+      query: (data: any) => {
+        return {
+          url: "lk/goods/update",
+          method: "POST",
+          body: data,
+        };
+      }, // путь к API, который возвращает JSON с карточками
+      invalidatesTags: ["goods"],
+    }),
+    updateMarketplace: builder.mutation<any, any>({
+      query: (data: any) => {
+        return {
+          url: "mp/goods/update",
           method: "POST",
           body: data,
         };
@@ -30,5 +50,7 @@ export const goodsApi = createApi({
 export const {
   useGetgoodsQuery,
   useGetAllgoodsQuery,
-  useUpdateGoodsFullMutation,
+  useUpdateGoodsMutation,
+  useUpdateStockMutation,
+  useUpdateMarketplaceMutation,
 } = goodsApi;

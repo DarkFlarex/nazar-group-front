@@ -8,7 +8,7 @@ interface Props {
 }
 
 const PrihodPrint = React.forwardRef<HTMLDivElement, Props>(
-  ({ header, items }, ref) => {
+  ({ header, items }: any, ref: any) => {
     if (!header) return null;
 
     return (
@@ -30,7 +30,7 @@ const PrihodPrint = React.forwardRef<HTMLDivElement, Props>(
             </tr>
           </thead>
           <tbody>
-            {items.map((i, idx) => (
+            {items.map((i: any, idx: any) => (
               <tr key={i.key}>
                 <td>{idx + 1}</td>
                 <td>{i.product}</td>

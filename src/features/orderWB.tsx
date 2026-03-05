@@ -28,7 +28,7 @@ const statusTag: any = {
 };
 
 const OrdersPage = () => {
-  const { data: orders = initialOrders } = useGetWBOrdersQuery();
+  const { data: orders = initialOrders } = useGetWBOrdersQuery({});
 
   const changeStatus = (id: number, status: string) => {
     console.log(`Меняем статус заказа ${id} на ${status}`);

@@ -13,10 +13,8 @@ import type { UploadFile, UploadProps } from "antd";
 import ImgCrop from "antd-img-crop";
 
 import {
-  useGetColorsQuery,
   useGetSubjectsQuery,
   useGetCategoriesQuery,
-  useGetCountriesQuery,
   useGetCharsQuery,
 } from "../store/api/wbDirectory";
 
@@ -36,8 +34,6 @@ const MarketplaceForm = () => {
   const { data: subjects = [] } = useGetSubjectsQuery({
     parentID: formData.category,
   });
-  const { data: colors = [] } = useGetColorsQuery();
-  const { data: countries = [] } = useGetCountriesQuery();
   const { data: chars = [] } = useGetCharsQuery(formData.subjectId, {
     skip: !formData.subjectId,
   });

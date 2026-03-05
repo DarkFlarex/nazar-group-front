@@ -5,10 +5,14 @@ export const cardsApi = createApi({
   reducerPath: "cardsApi",
   baseQuery: fetchBaseQuery({ baseUrl: "https://nazar-backend.333.kg/api/" }),
   endpoints: (builder) => ({
-    getCards: builder.query({
-      query: () => "wb/content/cards/list", // путь к API, который возвращает JSON с карточками
+    getCards: builder.query<any, { updatedAt?: string; nmID?: number } | void>({
+      query: (cursor) => ({
+        url: "/wb/content/cards/list",
+        method: "POST",
+        body: cursor || {},
+      }),
     }),
   }),
 });
 
-export const { useGetCardsQuery } = cardsApi;
+export const { useGetCardsQuery, useLazyGetCardsQuery } = cardsApi;

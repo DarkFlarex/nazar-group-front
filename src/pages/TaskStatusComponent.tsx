@@ -16,7 +16,6 @@ import {
   Modal,
   Descriptions,
   message,
-  Checkbox,
 } from "antd";
 import type { TableProps } from "antd";
 import {
@@ -162,8 +161,7 @@ const OzonTasksComponent: React.FC = () => {
     pollingInterval: 60000, // автообновление каждую минуту
   });
 
-  const [getPackageLabel, { isLoading: isLabelLoading }] =
-    useGetPackageLabelMutation();
+  const [getPackageLabel] = useGetPackageLabelMutation();
   const [getPackageLabelsBatch, { isLoading: isBatchLabelLoading }] =
     useGetPackageLabelsBatchMutation();
   const [assignTask, { isLoading: isAssigning }] = useAssignTaskMutation();

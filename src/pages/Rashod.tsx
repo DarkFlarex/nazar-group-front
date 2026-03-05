@@ -58,7 +58,7 @@ const RashodPage: React.FC = () => {
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
     documentTitle: "Расходная накладная",
-  });
+  } as any);
 
   /* ================= HEADER ================= */
   const handleValuesChange = (_: any, allValues: any) => {
@@ -293,10 +293,6 @@ const RashodPage: React.FC = () => {
           >
             <Input />
           </Form.Item>
-
-          <Form.Item name="warehouse" label="Склад">
-            <Input />
-          </Form.Item>
         </Space>
       </Form>
 
@@ -319,7 +315,12 @@ const RashodPage: React.FC = () => {
 
       <Table
         style={{ marginTop: 16 }}
-        columns={columns}
+        columns={columns.map((col) => ({
+          ...col,
+          onHeaderCell: () => ({
+            style: { whiteSpace: "nowrap" }, // предотвращает перенос строки в заголовке
+          }),
+        }))}
         dataSource={items}
         pagination={false}
         rowKey="key"

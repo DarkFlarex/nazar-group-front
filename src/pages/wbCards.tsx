@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import { Card, Row, Col, Typography, Spin, Radio, Tabs, Input } from "antd";
-import { useGetCardsQuery } from "../store/api/cardsApi";
+import { useState, useEffect } from "react";
+import { Table, Input, Button, Drawer, Typography, Spin } from "antd";
+import { useLazyGetCardsQuery } from "../store/api/cardsApi";
 
 const { Title, Text } = Typography;
-const { TabPane } = Tabs;
 
 interface StockData {
   [sku: string]: number;
@@ -11,188 +10,214 @@ interface StockData {
 
 const CardsListWB = () => {
   const [cards, setCards] = useState<any[]>([]);
-  const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+  const [cursor, setCursor] = useState<any>(null);
   const [search, setSearch] = useState("");
-  const [tabKey, setTabKey] = useState<"all" | "brand">("all");
+
   const [stocks, setStocks] = useState<StockData>({});
-  const [loadingStock, setLoadingStock] = useState(true);
+  const [loadingStock, setLoadingStock] = useState(false);
 
-  const { data, isLoading, error } = useGetCardsQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-  });
+  const [selectedCard, setSelectedCard] = useState<any>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Сохраняем карточки при загрузке
-  useEffect(() => {
-    if (data) {
-      setCards(data);
+  const [fetchCards, { isFetching }] = useLazyGetCardsQuery();
 
-      // Собираем все SKU для запроса остатков
-      const allSKUs = data.flatMap(
-        (card: any) => card.sizes?.flatMap((s: any) => s.skus) || []
-      );
+  const loadCards = async (nextCursor?: any) => {
+    try {
+      const res: any = await fetchCards(nextCursor).unwrap();
 
-      if (allSKUs.length > 0) {
-        setLoadingStock(true);
-        fetch(
-          `https://nazar-backend.333.kg/api/wb/stocks?sku=${allSKUs.join(",")}`
+      const newCards = [...cards, ...res.cards];
+
+      setCards(newCards);
+      setCursor(res.cursor);
+
+      loadStocks(newCards);
+    } catch (err) {
+      console.error("Ошибка загрузки карточек:", err);
+    }
+  };
+
+  const loadStocks = async (cardsList: any[]) => {
+    const allSKUs = [
+      ...new Set(
+        cardsList.flatMap(
+          (card: any) => card.sizes?.flatMap((s: any) => s.skus) || []
         )
-          .then((res) => res.json())
-          .then((stockData) => {
-            // stockData предполагаем в формате [{sku: '123', amount: 10}, ...]
-            const stockMap: StockData = {};
-            stockData.forEach((item: any) => {
-              stockMap[item.sku] = item.amount ?? 0;
-            });
-            setStocks(stockMap);
-          })
-          .catch((err) => console.error("Ошибка получения остатков:", err))
-          .finally(() => setLoadingStock(false));
-      }
-    }
-  }, [data]);
+      ),
+    ];
 
-  const filteredCards = cards.filter((card) => {
-    if (search) {
-      return (
-        card.title.toLowerCase().includes(search.toLowerCase()) ||
-        card.brand?.toLowerCase().includes(search.toLowerCase())
+    if (!allSKUs.length) return;
+
+    setLoadingStock(true);
+
+    try {
+      const res = await fetch(
+        `https://nazar-backend.333.kg/api/wb/stocks?sku=${allSKUs.join(",")}`
       );
-    }
-    return true;
-  });
 
-  if (isLoading) return <Spin tip="Загрузка карточек..." />;
-  if (error) return <Text type="danger">Ошибка загрузки карточек</Text>;
+      const stockData = await res.json();
+
+      const stockMap: StockData = {};
+
+      stockData.forEach((item: any) => {
+        stockMap[item.sku] = item.amount ?? 0;
+      });
+
+      setStocks(stockMap);
+    } catch (err) {
+      console.error("Ошибка получения остатков:", err);
+    } finally {
+      setLoadingStock(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCards();
+  }, []);
+
+  const filtered = cards.filter(
+    (card) =>
+      card.title?.toLowerCase().includes(search.toLowerCase()) ||
+      card.brand?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const columns = [
+    {
+      title: "Фото",
+      render: (_: any, record: any) =>
+        record.photos?.[0]?.tm && (
+          <img src={record.photos[0].tm} style={{ width: 50 }} />
+        ),
+    },
+    {
+      title: "Название",
+      dataIndex: "title",
+    },
+    {
+      title: "Бренд",
+      dataIndex: "brand",
+    },
+    {
+      title: "Артикул",
+      dataIndex: "vendorCode",
+    },
+    {
+      title: "ID",
+      dataIndex: "nmID",
+    },
+    {
+      title: "SKU",
+      render: (_: any, record: any) =>
+        record.sizes?.map((s: any) => s.skus.join(", ")).join("; "),
+    },
+    {
+      title: "Количество",
+      render: (_: any, record: any) => {
+        if (loadingStock) return <Spin size="small" />;
+
+        const skus = record.sizes?.flatMap((s: any) => s.skus) || [];
+
+        const total = skus.reduce(
+          (sum: number, sku: string) => sum + (stocks[sku] || 0),
+          0
+        );
+
+        return total;
+      },
+    },
+    {
+      title: "Действие",
+      render: (_: any, record: any) => (
+        <Button
+          onClick={() => {
+            setSelectedCard(record);
+            setDrawerOpen(true);
+          }}
+        >
+          Подробнее
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <div style={{ padding: 20 }}>
-      <Title level={3} style={{ textAlign: "center", marginBottom: 20 }}>
-        Карточки WB
-      </Title>
+      <Title level={3}>Карточки WB</Title>
 
-      <div
-        style={{
-          marginBottom: 16,
-          display: "flex",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-        }}
-      >
-        <Input
-          placeholder="Поиск по названию или бренду"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ width: 300, marginBottom: 8 }}
-        />
-        <Radio.Group
-          value={viewMode}
-          onChange={(e) => setViewMode(e.target.value)}
-        >
-          <Radio.Button value="grid">Карточки</Radio.Button>
-          <Radio.Button value="table">Таблица</Radio.Button>
-        </Radio.Group>
+      <Input
+        placeholder="Поиск по названию или бренду"
+        style={{ width: 300, marginBottom: 20 }}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      <Table
+        rowKey="nmID"
+        columns={columns}
+        dataSource={filtered}
+        loading={isFetching}
+        pagination={false}
+      />
+
+      <div style={{ marginTop: 20 }}>
+        <Button onClick={() => loadCards(cursor)} disabled={!cursor}>
+          Загрузить ещё
+        </Button>
       </div>
 
-      <Tabs
-        activeKey={tabKey}
-        onChange={setTabKey as any}
-        type="card"
-        style={{ marginBottom: 16 }}
+      <Drawer
+        title="Карточка товара"
+        width={500}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
       >
-        <TabPane tab="Все" key="all" />
-        <TabPane tab="По бренду" key="brand" />
-      </Tabs>
+        {selectedCard && (
+          <div>
+            <img
+              src={selectedCard.photos?.[0]?.big}
+              style={{ width: "100%", marginBottom: 20 }}
+            />
 
-      {viewMode === "grid" ? (
-        <Row gutter={[16, 16]}>
-          {filteredCards.map((card) => (
-            <Col xs={24} sm={12} md={8} lg={6} key={card.nmUUID}>
-              <Card title={card.title} bordered hoverable>
-                <Text strong>Бренд: </Text>
-                <Text>{card.brand || "-"}</Text>
-                <br />
-                <Text strong>Артикул: </Text>
-                <Text>{card.vendorCode}</Text>
-                <br />
-                <Text strong>ID товара: </Text>
-                <Text>{card.nmID}</Text>
-                <br />
-                <Text strong>Остатки по SKU: </Text>
-                {loadingStock ? (
-                  <Spin size="small" />
-                ) : (
-                  <ul style={{ margin: 0, paddingLeft: 20 }}>
-                    {card.sizes
-                      ?.flatMap((s: any) => s.skus)
-                      .map((sku: string) => (
-                        <li key={sku}>
-                          {sku}: {stocks[sku] ?? "-"}
-                        </li>
-                      )) ?? "-"}
-                  </ul>
-                )}
-                <Text strong>Размеры: </Text>
-                <Text>{`Д: ${card.dimensions.length || 0}, Ш: ${
-                  card.dimensions.width || 0
-                }, В: ${card.dimensions.height || 0}, Вес: ${
-                  card.dimensions.weightBrutto || 0
-                } кг`}</Text>
-                <br />
-                <Text strong>SKU: </Text>
-                <Text>
-                  {card.sizes.map((s: any) => s.skus.join(", ")).join("; ")}
-                </Text>
-                <br />
-                <Text strong>Описание: </Text>
-                <Text>{card.description || "-"}</Text>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th>Название</th>
-              <th>Бренд</th>
-              <th>Артикул</th>
-              <th>ID товара</th>
-              <th>Размеры</th>
-              <th>SKU</th>
-              <th>Остаток</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredCards.map((card) => (
-              <tr key={card.nmUUID} style={{ borderBottom: "1px solid #eee" }}>
-                <td>{card.title}</td>
-                <td>{card.brand || "-"}</td>
-                <td>{card.vendorCode}</td>
-                <td>{card.nmID}</td>
-                <td>{`Д: ${card.dimensions.length}, Ш: ${card.dimensions.width}, В: ${card.dimensions.height}, Вес: ${card.dimensions.weightBrutto}`}</td>
-                <td>
-                  {card.sizes.map((s: any) => s.skus.join(", ")).join("; ")}
-                </td>
-                <td>
-                  {loadingStock ? (
-                    <Spin size="small" />
-                  ) : (
-                    <ul style={{ margin: 0, paddingLeft: 20 }}>
-                      {card.sizes
-                        ?.flatMap((s: any) => s.skus)
-                        .map((sku: string) => (
-                          <li key={sku}>
-                            {sku}: {stocks[sku] ?? "-"}
-                          </li>
-                        )) ?? "-"}
-                    </ul>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            <Text strong>Название:</Text>
+            <div>{selectedCard.title}</div>
+
+            <Text strong>Бренд:</Text>
+            <div>{selectedCard.brand}</div>
+
+            <Text strong>Описание:</Text>
+            <div>{selectedCard.description}</div>
+
+            <Text strong>Артикул:</Text>
+            <div>{selectedCard.vendorCode}</div>
+
+            <Text strong>ID:</Text>
+            <div>{selectedCard.nmID}</div>
+
+            <Text strong>Размеры:</Text>
+            <div>
+              Д: {selectedCard.dimensions?.length} <br />
+              Ш: {selectedCard.dimensions?.width} <br />
+              В: {selectedCard.dimensions?.height} <br />
+              Вес: {selectedCard.dimensions?.weightBrutto}
+            </div>
+
+            <Text strong>SKU и остатки:</Text>
+
+            {selectedCard.sizes?.map((s: any) =>
+              s.skus.map((sku: string) => (
+                <div key={sku}>
+                  {sku} — {stocks[sku] ?? 0} шт
+                </div>
+              ))
+            )}
+
+            <Text strong>Создано:</Text>
+            <div>{selectedCard.createdAt}</div>
+
+            <Text strong>Обновлено:</Text>
+            <div>{selectedCard.updatedAt}</div>
+          </div>
+        )}
+      </Drawer>
     </div>
   );
 };

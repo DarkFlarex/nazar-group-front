@@ -1,13 +1,5 @@
-import React, { useState } from "react";
-import {
-  Form,
-  Input,
-  Select,
-  DatePicker,
-  InputNumber,
-  Row,
-  Col,
-} from "antd";
+import React from "react";
+import { Form, Input, Select, DatePicker, InputNumber, Row, Col } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 
 export interface HeaderValues {
@@ -64,12 +56,8 @@ const PrihodHeaderForm: React.FC<Props> = ({ onChange }) => {
             rules={[{ required: true }]}
           >
             <Select placeholder="Выберите поставщика">
-              <Select.Option value="supplier1">
-                ОсОО AutoParts KG
-              </Select.Option>
-              <Select.Option value="supplier2">
-                Auto Import
-              </Select.Option>
+              <Select.Option value="supplier1">ОсОО AutoParts KG</Select.Option>
+              <Select.Option value="supplier2">Auto Import</Select.Option>
             </Select>
           </Form.Item>
         </Col>

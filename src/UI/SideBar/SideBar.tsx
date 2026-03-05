@@ -26,7 +26,7 @@ const SideBar = () => {
       children: [
         { key: "/orders/orderWb", label: "WB" },
         { key: "/orders/orderOzon", label: "Ozon" },
-        { key: "/orders/tasksOzon", label: "Сборка Ozon" },
+        { key: "/orders/tasksOzon", label: "Сборочные задания" },
       ],
     },
     {
@@ -45,7 +45,7 @@ const SideBar = () => {
       children: [
         { key: "/market/wildberis", label: "WB" },
         { key: "/market/OzonStatus", label: "Статус Ozon" },
-        { key: "/market/StocksQoanPage", label: "Склад" },
+        // { key: "/market/StocksQoanPage", label: "Склад" },
         { key: "/market/OzonProductForm", label: "Ozon Форма" },
         { key: "/market/cardsmerket", label: "Карточки WB" },
         { key: "/market/OzonProductList", label: "Карточки Ozon" },

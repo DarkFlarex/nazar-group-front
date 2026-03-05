@@ -56,7 +56,7 @@ export const ozonCategoryApi = ozonBaseApi.injectEndpoints({
 
     // 🧩 Характеристики
     getDescriptionCategoryAttributes: builder.mutation<any, any>({
-      query: (body) => ({
+      query: (body: any) => ({
         url: "/v1/description-category/attribute",
         method: "POST",
         body: {
@@ -71,7 +71,7 @@ export const ozonCategoryApi = ozonBaseApi.injectEndpoints({
       { result: { task_id: string } },
       { items: OzonProductImportItem[] }
     >({
-      query: (body) => ({
+      query: (body: any) => ({
         url: "/v3/product/import",
         method: "POST",
         body,
@@ -80,21 +80,21 @@ export const ozonCategoryApi = ozonBaseApi.injectEndpoints({
 
     // ⏳ Статус импорта
     getImportProductStatus: builder.mutation<any, { task_id: string }>({
-      query: (body) => ({
+      query: (body: any) => ({
         url: "/v1/product/import/info",
         method: "POST",
         body,
       }),
     }),
     createOrUpdateProduct: builder.mutation({
-      query: (body) => ({
+      query: (body: any) => ({
         url: "/v2/product/import",
         method: "POST",
         body,
       }),
     }),
     getProductImportInfo: builder.mutation<any, { task_id: string }>({
-      query: (body) => ({
+      query: (body: any) => ({
         url: "/v1/product/import/info",
         method: "POST",
         body,
@@ -102,7 +102,7 @@ export const ozonCategoryApi = ozonBaseApi.injectEndpoints({
     }),
 
     getProductInfoStok: builder.mutation<any, any>({
-      query: (body) => ({
+      query: (body: any) => ({
         url: "/v4/product/info/stocks",
         method: "POST",
         body,
@@ -110,7 +110,7 @@ export const ozonCategoryApi = ozonBaseApi.injectEndpoints({
     }),
 
     getProductInfoStoks: builder.mutation<any, any>({
-      query: (body) => ({
+      query: () => ({
         url: "/v1/product/info/warehouse/stocks",
         method: "POST",
         body: {
@@ -121,7 +121,7 @@ export const ozonCategoryApi = ozonBaseApi.injectEndpoints({
       }),
     }),
     getProductInfoWare: builder.mutation<any, any>({
-      query: (body) => ({
+      query: () => ({
         url: "/v2/product/info/stocks-by-warehouse/fbs",
         method: "POST",
         body: {

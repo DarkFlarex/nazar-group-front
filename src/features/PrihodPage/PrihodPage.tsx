@@ -54,7 +54,7 @@ const PrihodPage: React.FC = () => {
   const printRef = useRef<any>(null);
   const [scanValue, setScanValue] = useState("");
   const [form] = Form.useForm();
-  const [goodsIncome, { isLoading }] = useGoodsIncomeMutation();
+  const [goodsIncome] = useGoodsIncomeMutation();
   const [header, setHeader] = useState<HeaderValues | null>(null);
   const [items, setItems] = useState<GoodsItem[]>([]);
 
@@ -63,7 +63,7 @@ const PrihodPage: React.FC = () => {
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
     documentTitle: "Приходная накладная",
-  });
+  } as any);
 
   /* ================= HEADER ================= */
 
@@ -140,7 +140,7 @@ const PrihodPage: React.FC = () => {
             updateRow(record.key, "productGuid", val);
             updateRow(record.key, "productName", product?.nameid);
           }}
-          options={products.map((p: Product) => ({
+          options={products.map((p: any) => ({
             value: p.guid,
             label: `${p.nameid} | ${p.manufacturer} | ${p.articul} | ${p.barcode}`,
             nameid: p.nameid,
@@ -261,10 +261,10 @@ const PrihodPage: React.FC = () => {
     }
 
     setItems((prev: any) => {
-      const existing = prev.find((x) => x.productGuid === product.guid);
+      const existing = prev.find((x: any) => x.productGuid === product.guid);
 
       if (existing) {
-        return prev.map((row) => {
+        return prev.map((row: any) => {
           if (row.productGuid !== product.guid) return row;
 
           const newQty = row.quantity + 1;
@@ -324,10 +324,6 @@ const PrihodPage: React.FC = () => {
             label="Поставщик"
             rules={[{ required: true }]}
           >
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="warehouse" label="Склад">
             <Input />
           </Form.Item>
         </Space>
