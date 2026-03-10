@@ -140,7 +140,7 @@ const CardsListWB = () => {
   ];
 
   return (
-    <div style={{ padding: 20 }}>
+    <div>
       <Title level={3}>Карточки WB</Title>
 
       <Input

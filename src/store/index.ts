@@ -7,6 +7,8 @@ import { goodsApi } from "./api/goodsApi";
 import { directoryApi } from "./api/directoryApi";
 import { warehouseApi } from "./api/invoiceApi";
 import { ozonApi } from "./api/ozonProduct";
+import { returnsApi } from "./api/returnsApi";
+import { wbClaimsApi } from "./api/wbClaimsApi";
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +20,8 @@ export const store = configureStore({
     [goodsApi.reducerPath]: goodsApi.reducer,
     [directoryApi.reducerPath]: directoryApi.reducer,
     [warehouseApi.reducerPath]: warehouseApi.reducer,
+    [returnsApi.reducerPath]: returnsApi.reducer,
+    [wbClaimsApi.reducerPath]: wbClaimsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -28,6 +32,8 @@ export const store = configureStore({
       wbOrderApi.middleware,
       goodsApi.middleware,
       directoryApi.middleware,
-      warehouseApi.middleware
+      returnsApi.middleware,
+      warehouseApi.middleware,
+      wbClaimsApi.middleware
     ),
 });

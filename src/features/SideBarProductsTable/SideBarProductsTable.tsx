@@ -197,15 +197,22 @@ const ProductsTableFull: React.FC = () => {
   const columns = [
     {
       title: "Код",
-      dataIndex: "codeid",
-      sorter: (a: any, b: any) => (a.codeid || 0) - (b.codeid || 0),
-      ...getColumnSearchProps("codeid"),
+      dataIndex: "articul",
+      sorter: (a: any, b: any) => (a.articul || 0) - (b.articul || 0),
+      ...getColumnSearchProps("articul"),
     },
     {
       title: "Наименование",
       dataIndex: "product_name",
       sorter: (a: any, b: any) => a.product_name.localeCompare(b.product_name),
       ...getColumnSearchProps("product_name"),
+    },
+    {
+      title: "ОЕМ",
+      dataIndex: "original_number",
+      sorter: (a: any, b: any) =>
+        a.original_number.localeCompare(b.original_number),
+      ...getColumnSearchProps("original_number"),
     },
     {
       title: "Производитель",

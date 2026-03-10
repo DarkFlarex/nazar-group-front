@@ -68,10 +68,10 @@ const InvoiceIncomeTable = () => {
     },
     {
       title: "Дата",
-      dataIndex: "doc_date",
+      dataIndex: "created_at",
       render: (date: string) => dayjs(date).format("DD.MM.YYYY"),
       sorter: (a, b) =>
-        new Date(a.doc_date).getTime() - new Date(b.doc_date).getTime(),
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     },
     {
       title: "Поставщик",
@@ -147,7 +147,7 @@ const InvoiceIncomeTable = () => {
   ];
 
   return (
-    <div style={{ padding: 24 }}>
+    <div>
       <Title level={3}>Приходные накладные</Title>
 
       <Card style={{ marginBottom: 16 }}>

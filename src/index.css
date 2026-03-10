@@ -58,3 +58,50 @@ body {
   margin: 16px 0 0;
   border-radius: 4px;
 }
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap");
+
+.task-card:hover {
+  box-shadow: 0 4px 32px rgba(59, 130, 246, 0.08) !important;
+}
+.item-row:hover {
+  background: rgba(59, 130, 246, 0.05) !important;
+}
+.detail-btn:hover {
+  background: #1e293b !important;
+  color: #60a5fa !important;
+  border-color: #3b82f6 !important;
+}
+.action-btn--primary:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35) !important;
+}
+.action-btn--success:hover {
+  background: linear-gradient(135deg, #15803d, #166534) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.35) !important;
+}
+.action-btn--print:hover:not(:disabled) {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+/* Override Ant Design search input for dark theme */
+.ant-input-affix-wrapper {
+  background: #111827 !important;
+  border-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-radius: 10px !important;
+}
+.ant-input-affix-wrapper input {
+  background: transparent !important;
+  color: #f1f5f9 !important;
+}
+.ant-input-affix-wrapper:hover,
+.ant-input-affix-wrapper:focus-within {
+  border-color: #3b82f6 !important;
+}
+.ant-input-clear-icon {
+  color: #475569 !important;
+}

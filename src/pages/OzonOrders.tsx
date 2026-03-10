@@ -91,17 +91,19 @@ const OzonOrders = () => {
       dataIndex: "warehouse",
     },
     {
-      title: "Товар",
-      dataIndex: "product_name",
+      title: "Проданные товары",
+      key: "products",
       ellipsis: true,
-    },
-    {
-      title: "SKU",
-      dataIndex: "sku",
-    },
-    {
-      title: "Кол-во",
-      dataIndex: "quantity",
+      render: (_: unknown, record: any) => (
+        <div>
+          {(record.products || []).map((prod: any) => (
+            <div key={prod.sku}>
+              {prod.name} — {prod.quantity} шт.
+              {prod.sku ? ` (SKU: ${prod.sku})` : ""}
+            </div>
+          ))}
+        </div>
+      ),
     },
     {
       title: "Цена",
@@ -166,18 +168,6 @@ const OzonOrders = () => {
           rowKey="posting_number"
           pagination={{ pageSize: 20 }}
           scroll={{ x: 1400 }}
-          expandable={{
-            expandedRowRender: (record: any) => (
-              <div>
-                <Text strong>Все товары:</Text>
-                {record.products?.map((prod: any) => (
-                  <div key={prod.sku}>
-                    {prod.name} — {prod.quantity} шт.
-                  </div>
-                ))}
-              </div>
-            ),
-          }}
         />
       ) : (
         <Row gutter={[16, 16]}>
@@ -191,12 +181,15 @@ const OzonOrders = () => {
                 <Text strong>Дата:</Text>{" "}
                 {dayjs(order.created_at).format("DD.MM.YYYY HH:mm")}
                 <br />
-                <Text strong>Товар:</Text> {order.product_name}
-                <br />
-                <Text strong>SKU:</Text> {order.sku}
-                <br />
-                <Text strong>Кол-во:</Text> {order.quantity}
-                <br />
+                <Text strong>Проданные товары:</Text>
+                <div style={{ marginTop: 4, marginBottom: 8 }}>
+                  {(order.products || []).map((prod: any) => (
+                    <div key={prod.sku}>
+                      {prod.name} — {prod.quantity} шт.
+                      {prod.sku ? ` (SKU: ${prod.sku})` : ""}
+                    </div>
+                  ))}
+                </div>
                 <Text strong>Цена:</Text> {order.price} ₽
                 <br />
                 <Text strong>Клиент оплатил:</Text> {order.customer_price} ₽

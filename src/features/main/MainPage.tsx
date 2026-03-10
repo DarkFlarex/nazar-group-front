@@ -27,6 +27,8 @@ import InvoiceIncomeTable from "../../pages/InvoiceIncomeTable";
 import ProductAttributesEditor from "../../pages/ProductAttributesEditor";
 import TaskStatusComponent from "../../pages/TaskStatusComponent";
 import RashodPage from "../../pages/Rashod";
+import ReturnsPage from "../../pages/OzonReturnsPage";
+import WbClaimsPage from "../../pages/WbClaimsPage";
 
 const { Content } = Layout;
 
@@ -95,6 +97,8 @@ const MainPage = () => {
                   path="/orders/tasksOzon"
                   element={<TaskStatusComponent />}
                 />
+                <Route path="/orders/return" element={<ReturnsPage />} />
+                <Route path="/orders/claims" element={<WbClaimsPage />} />
                 <Route
                   path="/orders/orderSuplier"
                   element={<SupplierOrdersPage />}

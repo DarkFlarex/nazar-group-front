@@ -12,7 +12,7 @@ const PrihodPrint = React.forwardRef<HTMLDivElement, Props>(
     if (!header) return null;
 
     return (
-      <div ref={ref} style={{ padding: 24 }}>
+      <div ref={ref}>
         <h2 style={{ textAlign: "center" }}>ПРИХОДНАЯ НАКЛАДНАЯ</h2>
 
         <p>Поставщик: {header.supplier}</p>

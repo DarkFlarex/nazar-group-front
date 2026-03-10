@@ -66,7 +66,7 @@ export const warehouseApi = createApi({
     // ===============================
     goodsExpense: builder.mutation({
       query: (body) => ({
-        url: "new/goods/sale",
+        url: "new/goods/expence",
         method: "POST",
         body,
       }),

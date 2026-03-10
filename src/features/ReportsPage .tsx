@@ -60,7 +60,7 @@ const ReportsPage = () => {
   };
 
   return (
-    <div style={{ padding: 24 }}>
+    <div>
       <h1>Отчеты</h1>
 
       <Card style={{ marginBottom: 24 }}>

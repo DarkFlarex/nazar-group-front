@@ -27,6 +27,8 @@ const SideBar = () => {
         { key: "/orders/orderWb", label: "WB" },
         { key: "/orders/orderOzon", label: "Ozon" },
         { key: "/orders/tasksOzon", label: "Сборочные задания" },
+        { key: "/orders/return", label: "Возвраты" },
+        { key: "/orders/claims", label: "Заявки на возврат" },
       ],
     },
     {
@@ -57,9 +59,9 @@ const SideBar = () => {
       label: "Накладные",
       children: [
         { key: "/invoices/prihod", label: "Приход" },
-        { key: "/invoices/see/income", label: "Список прихода" },
+        { key: "/invoices/see/income", label: "Накладные" },
         { key: "/invoices/rashod", label: "Расход" },
-        { key: "/invoices/customerOrdersPage", label: "Заказы клиентов" },
+        // { key: "/invoices/customerOrdersPage", label: "Заказы клиентов" },
       ],
     },
     {

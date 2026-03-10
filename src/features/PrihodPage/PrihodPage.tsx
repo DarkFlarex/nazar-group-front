@@ -298,7 +298,7 @@ const PrihodPage: React.FC = () => {
   /* ================= RENDER ================= */
 
   return (
-    <div style={{ padding: 24 }}>
+    <div>
       <h2>Приходная накладная</h2>
 
       <Form

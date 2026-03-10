@@ -268,7 +268,7 @@ const RashodPage: React.FC = () => {
 
   /* ================= RENDER ================= */
   return (
-    <div style={{ padding: 24 }}>
+    <div>
       <h2>Расходная накладная</h2>
 
       <Form
