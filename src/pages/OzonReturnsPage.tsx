@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const BASE_URL = "https://nazar-backend.333.kg/api/returns";
 
 // ── API helpers ────────────────────────────────────────────────
 const api = {
   getReturns: async (params = {}) => {
-    const query = new URLSearchParams();
+    const query: any = new URLSearchParams();
     Object.entries(params).forEach(([k, v]) => {
       if (v !== "" && v != null) query.set(k, v);
     });
@@ -18,7 +18,7 @@ const api = {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   },
-  getById: async (guid) => {
+  getById: async (guid: any) => {
     const res = await fetch(`${BASE_URL}/${guid}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
@@ -31,7 +31,7 @@ const api = {
 };
 
 // ── useDebounce ────────────────────────────────────────────────
-function useDebounce(value, delay = 400) {
+function useDebounce(value: any, delay: any = 400) {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
     const t = setTimeout(() => setDebounced(value), delay);
@@ -40,7 +40,7 @@ function useDebounce(value, delay = 400) {
   return debounced;
 }
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: any = {
   accepted: {
     label: "Принят",
     color: "#16a34a",
@@ -103,13 +103,13 @@ const STATUS_CONFIG = {
   },
 };
 
-const TYPE_CONFIG = {
+const TYPE_CONFIG: any = {
   FBO: { color: "#0369a1", bg: "#e0f2fe", border: "#7dd3fc" },
   FBS: { color: "#059669", bg: "#d1fae5", border: "#6ee7b7" },
   rFBS: { color: "#7c3aed", bg: "#ede9fe", border: "#c4b5fd" },
 };
 
-const fmtDate = (iso) => {
+const fmtDate = (iso: any) => {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("ru-RU", {
     day: "2-digit",
@@ -117,19 +117,18 @@ const fmtDate = (iso) => {
     year: "numeric",
   });
 };
-const fmtDateTime = (iso) => {
+const fmtDateTime = (iso: any) => {
   if (!iso) return "—";
-  return new Date(iso).toLocaleString("ru-RU", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return new Date(iso).toLocaleDateString();
 };
 
 // ── Icons ──────────────────────────────────────────────────────
-const Icon = ({ d, size = 16, stroke = "currentColor", fill = "none" }) => (
+const Icon = ({
+  d,
+  size = 16,
+  stroke = "currentColor",
+  fill = "none",
+}: any) => (
   <svg
     width={size}
     height={size}
@@ -162,7 +161,7 @@ const Icons = {
 };
 
 // ── Toast ──────────────────────────────────────────────────────
-const Toast = ({ toasts }) => (
+const Toast = ({ toasts }: any) => (
   <div
     style={{
       position: "fixed",
@@ -174,7 +173,7 @@ const Toast = ({ toasts }) => (
       gap: 8,
     }}
   >
-    {toasts.map((t) => (
+    {toasts.map((t: any) => (
       <div
         key={t.id}
         style={{
@@ -218,7 +217,7 @@ const Toast = ({ toasts }) => (
 );
 
 // ── StatusBadge ────────────────────────────────────────────────
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status }: any) => {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.unknown;
   return (
     <span
@@ -251,7 +250,7 @@ const StatusBadge = ({ status }) => {
 };
 
 // ── TypeBadge ──────────────────────────────────────────────────
-const TypeBadge = ({ type }) => {
+const TypeBadge = ({ type }: any) => {
   const cfg = TYPE_CONFIG[type] || {
     color: "#64748b",
     bg: "#f1f5f9",
@@ -277,7 +276,7 @@ const TypeBadge = ({ type }) => {
 };
 
 // ── StatCard ───────────────────────────────────────────────────
-const StatCard = ({ label, value, icon, accent, loading }) => (
+const StatCard = ({ label, value, icon, accent, loading }: any) => (
   <div
     style={{
       background: "#fff",
@@ -365,7 +364,7 @@ const SkeletonRow = () => (
 );
 
 // ── ReturnRow ──────────────────────────────────────────────────
-const ReturnRow = ({ ret, selected, onSelect, onView }) => {
+const ReturnRow = ({ ret, selected, onSelect, onView }: any) => {
   const [hovered, setHovered] = useState(false);
   return (
     <tr
@@ -523,7 +522,7 @@ const ReturnRow = ({ ret, selected, onSelect, onView }) => {
 };
 
 // ── DetailDrawer ───────────────────────────────────────────────
-const DetailDrawer = ({ ret, onClose, loadingDetail }) => {
+const DetailDrawer = ({ ret, onClose, loadingDetail }: any) => {
   if (!ret) return null;
 
   const rows = [
@@ -746,7 +745,7 @@ const DetailDrawer = ({ ret, onClose, loadingDetail }) => {
 };
 
 // ── StatusBar ──────────────────────────────────────────────────
-const StatusBar = ({ byStatus, total, loading }) => (
+const StatusBar = ({ byStatus, total, loading }: any) => (
   <div
     style={{
       background: "#fff",
@@ -791,7 +790,7 @@ const StatusBar = ({ byStatus, total, loading }) => (
             />
           </div>
         ))
-      : (byStatus || []).map(({ label, count }) => {
+      : (byStatus || []).map(({ label, count }: any) => {
           const cfg = STATUS_CONFIG[label] || { label, color: "#64748b" };
           const pct = total > 0 ? Math.round((count / total) * 100) : 0;
           return (
@@ -847,9 +846,9 @@ const StatusBar = ({ byStatus, total, loading }) => (
 // ══════════════════════════════════════════════════════════════
 export default function ReturnsPage() {
   // ── data state ──
-  const [returns, setReturns] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [pagination, setPagination] = useState({
+  const [returns, setReturns] = useState<any>([]);
+  const [stats, setStats] = useState<any>(null);
+  const [pagination, setPagination] = useState<any>({
     total: 0,
     page: 1,
     limit: 15,
@@ -857,31 +856,34 @@ export default function ReturnsPage() {
   });
 
   // ── ui state ──
-  const [loadingList, setLoadingList] = useState(false);
-  const [loadingStats, setLoadingStats] = useState(false);
-  const [loadingDetail, setLoadingDetail] = useState(false);
-  const [syncing, setSyncing] = useState(false);
-  const [toasts, setToasts] = useState([]);
-  const [detailRet, setDetailRet] = useState(null);
-  const [selected, setSelected] = useState(new Set());
-  const [showFilters, setShowFilters] = useState(false);
+  const [loadingList, setLoadingList] = useState<any>(false);
+  const [loadingStats, setLoadingStats] = useState<any>(false);
+  const [loadingDetail, setLoadingDetail] = useState<any>(false);
+  const [syncing, setSyncing] = useState<any>(false);
+  const [toasts, setToasts] = useState<any>([]);
+  const [detailRet, setDetailRet] = useState<any>(null);
+  const [selected, setSelected] = useState<any>(new Set());
+  const [showFilters, setShowFilters] = useState<any>(false);
 
   // ── filter state ──
-  const [search, setSearch] = useState("");
-  const [filterType, setFilterType] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState<any>("");
+  const [filterType, setFilterType] = useState<any>("");
+  const [filterStatus, setFilterStatus] = useState<any>("");
+  const [dateFrom, setDateFrom] = useState<any>("");
+  const [dateTo, setDateTo] = useState<any>("");
+  const [page, setPage] = useState<any>(1);
   const LIMIT = 15;
 
   const debouncedSearch = useDebounce(search, 450);
 
   // ── Toast helper ──
-  const addToast = useCallback((message, type = "info") => {
+  const addToast = useCallback((message: any, type: any = "info") => {
     const id = Date.now();
-    setToasts((p) => [...p, { id, message, type }]);
-    setTimeout(() => setToasts((p) => p.filter((t) => t.id !== id)), 4000);
+    setToasts((p: any) => [...p, { id, message, type }]);
+    setTimeout(
+      () => setToasts((p: any) => p.filter((t: any) => t.id !== id)),
+      4000
+    );
   }, []);
 
   // ══ Fetch returns list ═════════════════════════════════════
@@ -905,7 +907,7 @@ export default function ReturnsPage() {
       } else {
         throw new Error(data.error || "Ошибка загрузки");
       }
-    } catch (err) {
+    } catch (err: any) {
       addToast(`Ошибка загрузки списка: ${err.message}`, "error");
       setReturns([]);
     } finally {
@@ -920,7 +922,7 @@ export default function ReturnsPage() {
       const data = await api.getStats();
       if (data.success) setStats(data);
       else throw new Error(data.error || "Ошибка статистики");
-    } catch (err) {
+    } catch (err: any) {
       addToast(`Ошибка статистики: ${err.message}`, "error");
     } finally {
       setLoadingStats(false);
@@ -928,13 +930,13 @@ export default function ReturnsPage() {
   }, []);
 
   // ══ View detail (fetch fresh from API) ════════════════════
-  const handleView = useCallback(async (ret) => {
+  const handleView = useCallback(async (ret: any) => {
     setDetailRet(ret); // показываем drawer сразу с кэшированными данными
     setLoadingDetail(true);
     try {
       const data = await api.getById(ret.guid);
       if (data.success) setDetailRet(data.return);
-    } catch (err) {
+    } catch (err: any) {
       addToast(`Ошибка загрузки деталей: ${err.message}`, "error");
     } finally {
       setLoadingDetail(false);
@@ -962,7 +964,7 @@ export default function ReturnsPage() {
       } else {
         throw new Error(data.error || "Ошибка");
       }
-    } catch (err) {
+    } catch (err: any) {
       addToast(`Ошибка синхронизации: ${err.message}`, "error");
     } finally {
       setSyncing(false);
@@ -983,8 +985,8 @@ export default function ReturnsPage() {
   }, [debouncedSearch, filterType, filterStatus, dateFrom, dateTo]);
 
   // ── Helpers ──
-  const toggleSelect = (guid) => {
-    setSelected((prev) => {
+  const toggleSelect = (guid: any) => {
+    setSelected((prev: any) => {
       const s = new Set(prev);
       s.has(guid) ? s.delete(guid) : s.add(guid);
       return s;
@@ -993,7 +995,7 @@ export default function ReturnsPage() {
 
   const toggleAll = () => {
     if (selected.size === returns.length) setSelected(new Set());
-    else setSelected(new Set(returns.map((r) => r.guid)));
+    else setSelected(new Set(returns.map((r: any) => r.guid)));
   };
 
   const resetFilters = () => {
@@ -1301,8 +1303,8 @@ export default function ReturnsPage() {
           >
             <option value="">Все статусы</option>
             {Object.entries(STATUS_CONFIG)
-              .filter(([k]) => k !== "unknown")
-              .map(([k, v]) => (
+              .filter(([k]: any) => k !== "unknown")
+              .map(([k, v]: any) => (
                 <option key={k} value={k}>
                   {v.label}
                 </option>
@@ -1311,7 +1313,7 @@ export default function ReturnsPage() {
 
           {/* period */}
           <button
-            onClick={() => setShowFilters((v) => !v)}
+            onClick={() => setShowFilters((v: any) => !v)}
             style={{
               display: "flex",
               alignItems: "center",
@@ -1578,7 +1580,7 @@ export default function ReturnsPage() {
               </thead>
               <tbody>
                 {loadingList ? (
-                  Array.from({ length: LIMIT }).map((_, i) => (
+                  Array.from({ length: LIMIT }).map((_: any, i: any) => (
                     <SkeletonRow key={i} />
                   ))
                 ) : returns.length === 0 ? (
@@ -1610,7 +1612,7 @@ export default function ReturnsPage() {
                     </td>
                   </tr>
                 ) : (
-                  returns.map((ret) => (
+                  returns.map((ret: any) => (
                     <ReturnRow
                       key={ret.guid}
                       ret={ret}
@@ -1642,7 +1644,7 @@ export default function ReturnsPage() {
               </span>
               <div style={{ display: "flex", gap: 4 }}>
                 <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => setPage((p: any) => Math.max(1, p - 1))}
                   disabled={page === 1}
                   style={{
                     width: 32,
@@ -1659,7 +1661,7 @@ export default function ReturnsPage() {
                 >
                   <Icon d={Icons.arrowL} size={14} />
                 </button>
-                {pageNumbers.map((p, i) =>
+                {pageNumbers.map((p: any, i: any) =>
                   p === "…" ? (
                     <span
                       key={`e${i}`}
@@ -1698,7 +1700,9 @@ export default function ReturnsPage() {
                   )
                 )}
                 <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() =>
+                    setPage((p: any) => Math.min(totalPages, p + 1))
+                  }
                   disabled={page === totalPages}
                   style={{
                     width: 32,
@@ -1745,7 +1749,7 @@ export default function ReturnsPage() {
               Топ-5 причин возвратов
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              {stats.top_reasons.map(({ label, count }, i) => (
+              {stats.top_reasons.map(({ label, count }: any, i: any) => (
                 <div
                   key={i}
                   style={{

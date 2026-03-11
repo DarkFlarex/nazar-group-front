@@ -279,7 +279,7 @@ const RashodPage: React.FC = () => {
       >
         <Space size={16} wrap>
           <Form.Item name="docNumber" label="Номер">
-            <Input disabled />
+            <Input />
           </Form.Item>
 
           <Form.Item name="docDate" label="Дата">

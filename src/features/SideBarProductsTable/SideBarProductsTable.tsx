@@ -8,6 +8,8 @@ import {
   InputNumber,
   Space,
   message,
+  Image,
+  Divider,
 } from "antd";
 import {
   useGetgoodsQuery,
@@ -15,6 +17,9 @@ import {
   useUpdateStockMutation,
   useUpdateMarketplaceMutation,
 } from "../../store/api/goodsApi";
+
+// TODO: замените на реальный базовый URL для фотографий
+const PHOTO_BASE_URL = "https://nazar-backend.333.kg/uploads/";
 
 const ProductsTableFull: React.FC = () => {
   const { data: products = [], refetch } = useGetgoodsQuery();
@@ -24,7 +29,6 @@ const ProductsTableFull: React.FC = () => {
 
   const [editingProduct, setEditingProduct] = useState<any>(null);
 
-  // Управление тремя Drawer
   const [openMain, setOpenMain] = useState(false);
   const [openStock, setOpenStock] = useState(false);
   const [openMarket, setOpenMarket] = useState(false);
@@ -70,7 +74,6 @@ const ProductsTableFull: React.FC = () => {
       wild_name: record.wild_name,
     });
 
-    // открываем главное окно по умолчанию
     setOpenMain(true);
   };
 
@@ -140,17 +143,7 @@ const ProductsTableFull: React.FC = () => {
       message.error("Ошибка обновления маркетплейсов");
     }
   };
-  // const [searchText, setSearchText] = useState("");
 
-  // const filteredProducts = useMemo(() => {
-  //   if (!searchText) return products;
-  //   const lower = searchText.toLowerCase();
-  //   return products.filter((p: any) =>
-  //     Object.values(p).some(
-  //       (val) => val && val.toString().toLowerCase().includes(lower)
-  //     )
-  //   );
-  // }, [products, searchText]);
   const getColumnSearchProps = (dataIndex: string) => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -194,7 +187,50 @@ const ProductsTableFull: React.FC = () => {
         : false;
     },
   });
+
   const columns = [
+    {
+      title: "Фото",
+      dataIndex: "photos",
+      width: 70,
+      render: (photos: any[]) => {
+        const firstPhoto = photos?.[0];
+        if (!firstPhoto) {
+          return (
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                background: "#f0f0f0",
+                border: "1px dashed #d9d9d9",
+                borderRadius: 4,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 10,
+                color: "#bbb",
+              }}
+            >
+              Нет фото
+            </div>
+          );
+        }
+        return (
+          <Image
+            src={`${PHOTO_BASE_URL}${firstPhoto.photo_url}`}
+            width={48}
+            height={48}
+            style={{ objectFit: "cover", borderRadius: 4, cursor: "pointer" }}
+            preview={false}
+            onClick={(e) => {
+              // Prevent row click from opening the drawer
+              e.stopPropagation();
+            }}
+            fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAABo0lEQVR4nO2YzUrDQBDHc6qXHjx48CKKd/EBfAAFH8CLJ+/iQfAiHsSDB8GDB/EgXoSDB8GDB8GDB8GDB8GDB8GDB8GDiIjIJptkk91kMyubLGw2aZJNN7vZJv8fDCwzk5l/ZnaXCCGEEEL+MRFC+OjEGJMxxlillFJKlVLKGGOstdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmv/s9ba+2+ttffeW2vvvbfW3ntrrbX33lprrb33Wmu5z5RSSimllFJKKaWUUkoppZRSSikVEZGIiERERERERERERERERERERERERERERERERERERETENyJylFLKHCil1EgpdQNgB8AxgBcAL0opJUQkIiIioULIPQDfAN4BvALYBbAF4ADAAwBXABYBLACYBzAHYBbANIBJABMAzs6BHwBOAZwAOARwAOAQwAECgIPnAXgAeAAeAB4AHgAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQkiInwCPisMiVF8LYQAAAABJRU5ErkJggg=="
+          />
+        );
+      },
+    },
     {
       title: "Код",
       dataIndex: "articul",
@@ -204,20 +240,21 @@ const ProductsTableFull: React.FC = () => {
     {
       title: "Наименование",
       dataIndex: "product_name",
-      sorter: (a: any, b: any) => a.product_name.localeCompare(b.product_name),
+      sorter: (a: any, b: any) =>
+        (a.product_name || "").localeCompare(b.product_name || ""),
       ...getColumnSearchProps("product_name"),
     },
     {
       title: "ОЕМ",
       dataIndex: "original_number",
       sorter: (a: any, b: any) =>
-        a.original_number.localeCompare(b.original_number),
+        (a.original_number || "").localeCompare(b.original_number || ""),
       ...getColumnSearchProps("original_number"),
     },
     {
       title: "Производитель",
       dataIndex: "manufacturer",
-      render: (record: any) => record.manufacturer?.[0] ?? "-",
+      render: (manufacturer: any) => manufacturer?.[0] ?? "-",
       sorter: (a: any, b: any) =>
         (a.manufacturer?.[0] ?? "").localeCompare(b.manufacturer?.[0] ?? ""),
       ...getColumnSearchProps("manufacturer"),
@@ -225,7 +262,8 @@ const ProductsTableFull: React.FC = () => {
     {
       title: "Штрихкод",
       dataIndex: "barcode",
-      sorter: (a: any, b: any) => (a.barcode || "").localeCompare(b.barcode),
+      sorter: (a: any, b: any) =>
+        (a.barcode || "").localeCompare(b.barcode || ""),
       ...getColumnSearchProps("barcode"),
     },
     {
@@ -266,41 +304,43 @@ const ProductsTableFull: React.FC = () => {
     {
       title: "OZON SKU",
       dataIndex: "ozon_sku",
-      sorter: (a: any, b: any) => (a.ozon_sku || "").localeCompare(b.ozon_sku),
+      sorter: (a: any, b: any) =>
+        (a.ozon_sku || "").localeCompare(b.ozon_sku || ""),
       ...getColumnSearchProps("ozon_sku"),
     },
     {
       title: "OZON Product ID",
       dataIndex: "ozon_product_id",
       sorter: (a: any, b: any) =>
-        (a.ozon_product_id || "").localeCompare(b.ozon_product_id),
+        (a.ozon_product_id || "").localeCompare(b.ozon_product_id || ""),
       ...getColumnSearchProps("ozon_product_id"),
     },
     {
       title: "OZON Name",
       dataIndex: "ozon_name",
       sorter: (a: any, b: any) =>
-        (a.ozon_name || "").localeCompare(b.ozon_name),
+        (a.ozon_name || "").localeCompare(b.ozon_name || ""),
       ...getColumnSearchProps("ozon_name"),
     },
     {
       title: "Wild SKU",
       dataIndex: "wild_sku",
-      sorter: (a: any, b: any) => (a.wild_sku || "").localeCompare(b.wild_sku),
+      sorter: (a: any, b: any) =>
+        (a.wild_sku || "").localeCompare(b.wild_sku || ""),
       ...getColumnSearchProps("wild_sku"),
     },
     {
       title: "Wild Product ID",
       dataIndex: "wild_product_id",
       sorter: (a: any, b: any) =>
-        (a.wild_product_id || "").localeCompare(b.wild_product_id),
+        (a.wild_product_id || "").localeCompare(b.wild_product_id || ""),
       ...getColumnSearchProps("wild_product_id"),
     },
     {
       title: "Wild Name",
       dataIndex: "wild_name",
       sorter: (a: any, b: any) =>
-        (a.wild_name || "").localeCompare(b.wild_name),
+        (a.wild_name || "").localeCompare(b.wild_name || ""),
       ...getColumnSearchProps("wild_name"),
     },
   ];
@@ -323,6 +363,7 @@ const ProductsTableFull: React.FC = () => {
         rowKey="guid"
         onRow={(record) => ({
           onClick: () => handleEdit(record),
+          style: { cursor: "pointer" },
         })}
         bordered
         size="small"
@@ -333,9 +374,66 @@ const ProductsTableFull: React.FC = () => {
       <Drawer
         title="Основные данные товара"
         open={openMain}
-        width={400}
+        width={480}
         onClose={() => setOpenMain(false)}
       >
+        {/* Галерея фотографий */}
+        {editingProduct?.photos?.length > 0 && (
+          <>
+            <Divider
+              orientation="horizontal"
+              style={{ fontSize: 13, marginTop: 0 }}
+            >
+              Фотографии ({editingProduct.photos.length})
+            </Divider>
+            <Image.PreviewGroup>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 8,
+                  marginBottom: 16,
+                }}
+              >
+                {editingProduct.photos.map((photo: any) => (
+                  <Image
+                    key={photo.id}
+                    src={`${PHOTO_BASE_URL}${photo.photo_url}`}
+                    width={80}
+                    height={80}
+                    style={{
+                      objectFit: "cover",
+                      borderRadius: 6,
+                      border: "1px solid #f0f0f0",
+                    }}
+                    fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAABo0lEQVR4nO2YzUrDQBDHc6qXHjx48CKKd/EBfAAFH8CLJ+/iQfAiHsSDB8GDB/EgXoSDB8GDB8GDB8GDB8GDB8GDB8GDiIjIJptkk91kMyubLGw2aZJNN7vZJv8fDCwzk5l/ZnaXCCGEEEL+MRFC+OjEGJMxxlillFJKlVLKGGOstdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmv/s9ba+2+ttffeW2vvvbfW3ntrrbX33lprrb33Wmu5z5RSSimllFJKKaWUUkoppZRSSikVEZGIiERERERERERERERERERERERERERERERERERERETENyJylFLKHCil1EgpdQNgB8AxgBcAL0opJUQkIiIioULIPQDfAN4BvALYBbAF4ADAAwBXABYBLACYBzAHYBbANIBJABMAzs6BHwBOAZwAOARwAOAQwAECgIPnAXgAeAAeAB4AHgAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAA8ADwAPAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQkiInwCPisMiVF8LYQAAAABJRU5ErkJggg=="
+                  />
+                ))}
+              </div>
+            </Image.PreviewGroup>
+            <Divider orientation="horizontal" style={{ fontSize: 13 }}>
+              Основные поля
+            </Divider>
+          </>
+        )}
+
+        {editingProduct?.photos?.length === 0 && (
+          <div
+            style={{
+              marginBottom: 16,
+              padding: "12px 16px",
+              background: "#fafafa",
+              borderRadius: 6,
+              border: "1px dashed #d9d9d9",
+              color: "#aaa",
+              fontSize: 13,
+              textAlign: "center",
+            }}
+          >
+            Нет фотографий для этого товара
+          </div>
+        )}
+
         <Form form={formMain} layout="vertical" onFinish={handleMainSubmit}>
           <Form.Item name="product_name" label="Наименование">
             <Input />
@@ -358,7 +456,7 @@ const ProductsTableFull: React.FC = () => {
           <Form.Item name="category_external_id" label="Внешний ID категории">
             <Input />
           </Form.Item>
-          <Space>
+          <Space wrap>
             <Button type="primary" htmlType="submit">
               Сохранить
             </Button>

@@ -21,7 +21,10 @@ export const returnsApi = createApi({
     }),
     getReturnById: builder.query({
       query: (guid) => `/${guid}`,
-      providesTags: (result, error, guid) => [{ type: "Returns", id: guid }],
+      providesTags: (result: any, error: any, guid: any) => {
+        console.log(result, error);
+        return [{ type: "Returns", id: guid }];
+      },
     }),
     syncReturns: builder.mutation({
       query: () => ({

@@ -8,12 +8,13 @@ export interface Invoice {
   warehouse: string;
   total_sum: number;
   created_at: string;
-  status: number;
+  status: number | string; // статус может быть 'draft', поэтому добавил string
   invoice_type_name: string;
 }
 
 export interface InvoiceItem {
   guid: string;
+  goodid: string; // <-- ДОБАВЛЕНО (ОБЯЗАТЕЛЬНО возвращать с бэка!)
   count: number;
   price: number;
   discount: number;
@@ -43,7 +44,7 @@ export const warehouseApi = createApi({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Goods"],
+      invalidatesTags: ["Goods", "Invoice"],
     }),
 
     getInvoices: builder.query<Invoice[], GetInvoicesParams | undefined>({
@@ -53,7 +54,20 @@ export const warehouseApi = createApi({
       }),
       providesTags: ["Invoice"],
     }),
-
+    postInvoice: builder.mutation<
+      { success: boolean; message: string },
+      string
+    >({
+      query: (guid) => ({
+        url: `invoice/${guid}/post`,
+        method: "POST",
+      }),
+      invalidatesTags: (_result, _error, guid) => [
+        "Invoice",
+        "Goods",
+        { type: "InvoiceItems", id: guid },
+      ],
+    }),
     getInvoiceItems: builder.query<InvoiceItem[], string>({
       query: (guid) => `invoice/${guid}/items`,
       providesTags: (_result, _error, guid) => [
@@ -62,7 +76,7 @@ export const warehouseApi = createApi({
     }),
 
     // ===============================
-    // 💰 Расход товара
+    // 💰 Расход товара (Создание)
     // ===============================
     goodsExpense: builder.mutation({
       query: (body) => ({
@@ -70,7 +84,24 @@ export const warehouseApi = createApi({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Goods"],
+      invalidatesTags: ["Goods", "Invoice"],
+    }),
+
+    // ===============================
+    // 💰 Расход товара (Редактирование)
+    // ===============================
+    updateGoodsExpense: builder.mutation({
+      query: ({ guid, ...body }) => ({
+        url: `goods/expence/${guid}`,
+        method: "PUT",
+        body,
+      }),
+      // Инвалидируем все связанные данные, чтобы интерфейс сам перезапросил актуальную инфу
+      invalidatesTags: (_result, _error, { guid }) => [
+        "Goods",
+        "Invoice",
+        { type: "InvoiceItems", id: guid },
+      ],
     }),
 
     // ===============================
@@ -126,6 +157,8 @@ export const warehouseApi = createApi({
 export const {
   useGoodsIncomeMutation,
   useGoodsExpenseMutation,
+  useUpdateGoodsExpenseMutation, // <--- Экспортируем новый хук
+  usePostInvoiceMutation, // ✅ НОВЫЙ
   useAddClientMutation,
   useUpdateClientMutation,
   useAddManufacturerMutation,

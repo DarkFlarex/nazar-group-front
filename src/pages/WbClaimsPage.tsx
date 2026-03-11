@@ -97,12 +97,6 @@ interface RejectFormValues {
   reason: string;
 }
 
-interface StatCard {
-  value: number;
-  color: string;
-  bg: string;
-}
-
 // ─────────────────────────────────────────────
 // 🖥️ Основной компонент
 // ─────────────────────────────────────────────
@@ -411,7 +405,7 @@ const WbClaimsPage: React.FC = () => {
   // ─────────────────────────────────────────────
 
   return (
-    <div style={{ padding: 24 }}>
+    <div>
       {/* ── Заголовок ─────────────────────── */}
       <div
         style={{

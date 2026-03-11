@@ -7,12 +7,10 @@ import {
   Spin,
   Alert,
   Button,
-  Space,
   Tooltip,
   Modal,
   Descriptions,
   message,
-  Badge,
   Empty,
 } from "antd";
 import {
@@ -573,7 +571,7 @@ const OzonTasksComponent: React.FC = () => {
           <div style={styles.cardGrid}>
             {finalData.map((task) => {
               const taskMeta = getStatusMeta(task.status);
-              const orderMeta = getStatusMeta(task.order?.status);
+              // const orderMeta = getStatusMeta(task.order?.status);
               const canSelect = task.order?.status === "awaiting_deliver";
               const isSelected = selectedKeys.includes(task.key);
               const isLabelLoading = loadingLabelGuid === task.posting?.guid;
@@ -932,7 +930,6 @@ const styles: Record<string, React.CSSProperties> = {
   page: {
     minHeight: "100vh",
     background: "#f8fafc",
-    padding: "24px",
     fontFamily: "'Inter', 'SF Pro Display', system-ui, sans-serif",
   },
   centerBox: {
@@ -1029,6 +1026,8 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     gap: 16,
+    // maxHeight: "70vh",
+    overflow: "auto",
   },
   taskCard: {
     background: "#ffffff",
