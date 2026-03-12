@@ -43,19 +43,18 @@ export const wbOrderApi = createApi({
         };
       },
     }),
-    getWBOrdersStatus: builder.mutation<any, { orders: string[] }>({
+    getWBOrdersStatus: builder.mutation<any, { orders: number[] }>({
       query: (body) => ({
         url: "/wildberries/orders/status",
         method: "POST",
         body,
       }),
     }),
-    getOzonOrders: builder.query<any, void>({
-      query: () => {
-        return {
-          url: "/ozon/orders",
-        };
-      },
+    getOzonOrders: builder.query<any, any>({
+      query: (params) => ({
+        url: "/ozon/orders",
+        params,
+      }),
     }),
     getOzonPost: builder.query<any, void>({
       query: () => {

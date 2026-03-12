@@ -648,6 +648,7 @@ const OzonTasksComponent: React.FC = () => {
                       <span>
                         {task.created_at
                           ? new Date(task.created_at).toLocaleString("ru-RU", {
+                              timeZone: "UTC",
                               day: "2-digit",
                               month: "2-digit",
                               hour: "2-digit",

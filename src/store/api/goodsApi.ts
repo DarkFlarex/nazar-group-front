@@ -41,7 +41,7 @@ export const goodsApi = createApi({
           method: "POST",
           body: data,
         };
-      }, // путь к API, который возвращает JSON с карточками
+      },
       invalidatesTags: ["goods"],
     }),
   }),

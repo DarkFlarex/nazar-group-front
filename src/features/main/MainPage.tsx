@@ -1,6 +1,13 @@
-import { Layout, ConfigProvider } from "antd";
+import { Layout, ConfigProvider, Typography } from "antd";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  ShopOutlined,
+  AppstoreOutlined,
+  ShoppingCartOutlined,
+} from "@ant-design/icons";
+
 import SideBar from "../../UI/SideBar/SideBar";
+
 import SideBarClientsTable from "../SideBarClientsTable/SideBarClientsTable";
 import SideBarProductsTable from "../SideBarProductsTable/SideBarProductsTable";
 import SuppliersTable from "../SuppliersTable/SuppliersTable";
@@ -30,21 +37,64 @@ import RashodPage from "../../pages/Rashod";
 import ReturnsPage from "../../pages/OzonReturnsPage";
 import WbClaimsPage from "../../pages/WbClaimsPage";
 
-const { Content } = Layout;
+const { Header, Content, Footer } = Layout;
+const { Title } = Typography;
 
 const MainPage = () => {
   return (
-    <ConfigProvider theme={{}}>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: "#1677ff",
+          borderRadius: 8,
+        },
+      }}
+    >
       <Router>
-        <Layout style={{ minHeight: "100vh" }}>
+        <Layout style={{ height: "100vh", overflow: "hidden" }}>
           <SideBar />
 
-          <Layout>
+          <Layout
+            style={{
+              height: "100vh",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* HEADER */}
+            <Header
+              style={{
+                background: "#fff",
+                padding: "0 24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                zIndex: 10,
+                flexShrink: 0,
+              }}
+            >
+              <Title level={4} style={{ margin: 0 }}>
+                📦 Warehouse System
+              </Title>
+
+              <div style={{ display: "flex", gap: 20 }}>
+                <ShopOutlined style={{ fontSize: 20 }} />
+                <ShoppingCartOutlined style={{ fontSize: 20 }} />
+                <AppstoreOutlined style={{ fontSize: 20 }} />
+              </div>
+            </Header>
+
+            {/* CONTENT */}
             <Content
               style={{
-                padding: "16px",
-                height: "100vh", // полностью занимает высоту окна
-                overflow: "auto", // включает вертикальный скролл
+                flex: 1,
+                minHeight: 0,
+                padding: "20px",
+                background: "#f5f6fa",
+                overflowY: "auto",
+                overflowX: "hidden",
               }}
             >
               <Routes>
@@ -58,34 +108,43 @@ const MainPage = () => {
                 <Route path="/market/wildberis" element={<MarketplaceForm />} />
                 <Route path="/market/cardsmerket" element={<CardsListWB />} />
                 <Route path="/market/ozonCards" element={<CardsPageOZ />} />
+
                 <Route
                   path="/invoices/customerOrdersPage"
                   element={<CustomerOrdersPage />}
                 />
+
                 <Route
                   path="/directories/clients"
                   element={<SideBarClientsTable />}
                 />
+
                 <Route
                   path="/market/OzonProductList"
                   element={<OzonProductList />}
                 />
+
                 <Route
                   path="/directories/products"
                   element={<SideBarProductsTable />}
                 />
+
                 <Route path="/reports/main" element={<ReportsPage />} />
                 <Route path="/directories/categories" element={<Category />} />
                 <Route path="/categories" element={<CategoriesPage />} />
+
                 <Route
                   path="/directories/suppliers"
                   element={<SuppliersTable />}
                 />
+
                 <Route path="/orders/orderWB" element={<WbOrdersPage />} />
+
                 <Route
                   path="/market/OzonStatus"
                   element={<OzonProductImportStatus />}
                 />
+
                 <Route
                   path="/market/StocksQoanPage"
                   element={<StocksQoanPage />}
@@ -93,32 +152,52 @@ const MainPage = () => {
 
                 <Route path="/orders/orderWb" element={<OrdersWBPage />} />
                 <Route path="/orders/OrderOzon" element={<OzonOrders />} />
+
                 <Route
                   path="/orders/tasksOzon"
                   element={<TaskStatusComponent />}
                 />
+
                 <Route path="/orders/return" element={<ReturnsPage />} />
                 <Route path="/orders/claims" element={<WbClaimsPage />} />
+
                 <Route
                   path="/orders/orderSuplier"
                   element={<SupplierOrdersPage />}
                 />
+
                 <Route
                   path="/market/OzonProductForm"
                   element={<OzonProductForm />}
                 />
+
                 <Route path="/supply/SupplyTable" element={<SupplyTable />} />
+
                 <Route
                   path="/supply/PostingsOzon"
                   element={<PostingsTable />}
                 />
+
                 <Route
                   path="/product/:type/:value"
                   element={<ProductAttributesEditor />}
                 />
+
                 <Route path="/invoices/rashodlist" element={<ExpensePage />} />
               </Routes>
             </Content>
+
+            {/* FOOTER */}
+            <Footer
+              style={{
+                textAlign: "center",
+                background: "#fff",
+                borderTop: "1px solid #eee",
+                flexShrink: 0,
+              }}
+            >
+              Warehouse System ©2026 | Powered by React + Ant Design
+            </Footer>
           </Layout>
         </Layout>
       </Router>

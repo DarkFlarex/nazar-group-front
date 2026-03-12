@@ -119,7 +119,13 @@ const fmtDate = (iso: any) => {
 };
 const fmtDateTime = (iso: any) => {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString();
+  return new Date(iso).toLocaleString("ru-RU", {
+    timeZone: "UTC",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 // ── Icons ──────────────────────────────────────────────────────
